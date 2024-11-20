@@ -1,0 +1,2 @@
+# snowflake_machine_learning_system
+Snowflake 環境での機械学習システムのexample
