@@ -4,9 +4,7 @@ name: PR Checks
 
 # Controls when the workflow will run
 on:
-  
-  push:
-    branches: [ "develop", "main" ]
+
   pull_request:
     branches: [ "develop", "main" ]
 
@@ -44,7 +42,7 @@ jobs:
         run: poetry run ruff format . --check --diff
         
       - name: Run pytest
-        run: poetry run pytest
+        run: poetry run pytest --cov --cov-branch --cov-report=term-missing --junitxml=pytest.xml test | tee pytest-coverage.txt
 
       - name: Pytest coverage comment
         uses: MishaKav/pytest-coverage-comment@main
