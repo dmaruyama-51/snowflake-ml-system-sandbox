@@ -22,5 +22,16 @@
     // mypy の設定
     "mypy-type-checker.args": [
         "--config-file=pyproject.toml"
+    ],
+
+    // pytestをVSCodeのテストフレームワークとして使用する
+    "python.testing.pytestEnabled": true,
+
+    // 他のテストフレームワーク（unittest）を無効化
+    "python.testing.unittestEnabled": false,
+
+    // pytestが検索するディレクトリを指定
+    "python.testing.pytestArgs": [
+        "tests"
     ]
 }
