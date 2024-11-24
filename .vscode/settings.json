@@ -1,0 +1,37 @@
+{
+    // Ruffをデフォルトのフォーマッターとして設定
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    
+    // 保存時に自動フォーマット
+    "editor.formatOnSave": true,
+    
+    // Ruffの設定
+    "[python]": {
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.fixAll.ruff": "explicit",
+            "source.organizeImports.ruff": "explicit"
+        }
+    },
+    
+    // Ruffの詳細設定
+    "ruff.lint.run": "onSave",
+    "ruff.format.args": [],
+    "ruff.lint.args": [],
+
+    // mypy の設定
+    "mypy-type-checker.args": [
+        "--config-file=pyproject.toml"
+    ],
+
+    // pytestをVSCodeのテストフレームワークとして使用する
+    "python.testing.pytestEnabled": true,
+
+    // 他のテストフレームワーク（unittest）を無効化
+    "python.testing.unittestEnabled": false,
+
+    // pytestが検索するディレクトリを指定
+    "python.testing.pytestArgs": [
+        "tests"
+    ]
+}
