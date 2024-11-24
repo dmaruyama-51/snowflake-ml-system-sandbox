@@ -1,0 +1,21 @@
+{
+    // Ruffをデフォルトのフォーマッターとして設定
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    
+    // 保存時に自動フォーマット
+    "editor.formatOnSave": true,
+    
+    // Ruffの設定
+    "[python]": {
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.fixAll.ruff": "explicit",
+            "source.organizeImports.ruff": "explicit"
+        }
+    },
+    
+    // Ruffの詳細設定
+    "ruff.lint.run": "onSave",
+    "ruff.format.args": [],
+    "ruff.lint.args": []
+}
