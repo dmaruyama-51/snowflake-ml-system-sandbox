@@ -34,7 +34,7 @@ def mock_session_builder(mocker):
 
 
 def test_create_session_success(mock_json_file, mock_session_builder):
-    """正常系のテスト：セッションが正常に作成される場合"""
+    """セッションが正常に作成される場合"""
     # 関数の実行
     result = create_session()
 
@@ -44,7 +44,7 @@ def test_create_session_success(mock_json_file, mock_session_builder):
 
 
 def test_create_session_connection_error(mock_json_file, mock_session_builder):
-    """異常系のテスト：Snowflakeへの接続に失敗する場合"""
+    """Snowflakeへの接続に失敗する場合"""
     # モックの設定
     mock_session_builder.configs.return_value.create.side_effect = (
         SnowparkSessionException("接続エラー")
