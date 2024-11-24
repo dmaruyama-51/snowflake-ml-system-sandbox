@@ -25,16 +25,6 @@ def create_session() -> Optional[Session]:
 
         return Session.builder.configs(connection_parameters).create()
 
-    except FileNotFoundError as e:
-        raise FileNotFoundError(
-            f"設定ファイルが見つかりません: {CONNECTION_PARAMETERS_PATH}"
-        ) from e
-
-    except json.JSONDecodeError as e:
-        raise json.JSONDecodeError(
-            f"設定ファイルのJSONが不正です: {e.msg}", e.doc, e.pos
-        ) from e
-
     except SnowparkSessionException as e:
         raise SnowparkSessionException(
             f"Snowflakeへの接続に失敗しました: {str(e)}"
