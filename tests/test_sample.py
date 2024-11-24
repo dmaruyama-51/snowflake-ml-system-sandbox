@@ -1,2 +1,5 @@
+from src.sample import sample
+
+
 def test_sample():
-    assert True
+    sample()

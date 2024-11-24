@@ -29,8 +29,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install Poetry
-        run: |
-          curl -sSL https://install.python-poetry.org | python3 -
+        run: curl -sSL https://install.python-poetry.org | python3 -
 
       - name: Install devdependencies
         run: poetry install --with dev
@@ -42,7 +41,7 @@ jobs:
         run: poetry run ruff format . --check --diff
         
       - name: Run pytest
-        run: poetry run pytest --cov=src --cov-branch --cov-report=term-missing --junitxml=pytest.xml tests | tee pytest-coverage.txt
+        run: poetry run pytest --cov=src --cov-branch --cov-report=term-missing --junitxml=pytest.xml tests/ | tee pytest-coverage.txt
 
       - name: Pytest coverage comment
         uses: MishaKav/pytest-coverage-comment@main
