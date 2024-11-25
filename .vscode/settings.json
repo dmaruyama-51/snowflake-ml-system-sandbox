@@ -33,5 +33,7 @@
     // pytestが検索するディレクトリを指定
     "python.testing.pytestArgs": [
         "tests"
-    ]
+    ],
+
+    "mypy.dmypyExecutable": "${workspaceFolder}/.venv/bin/dmypy"
 }
