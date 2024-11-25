@@ -4,11 +4,14 @@ version = "0.1.0"
 description = ""
 authors = ["dmaruyama-51 <0501awasuram@gmail.com>"]
 readme = "README.md"
+packages = [{include = "src"}]
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = ">=3.11,<3.12"
 pytest = "^8.3.3"
 pytest-cov = "^6.0.0"
+snowflake-snowpark-python = {extras = ["pandas"], version = "^1.25.0"}
+pytest-mock = "^3.14.0"
 
 
 [tool.poetry.group.dev.dependencies]
