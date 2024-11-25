@@ -15,8 +15,6 @@ def create_session() -> Optional[Session]:
         Session: 成功時はSnowparkセッション、失敗時はNone
 
     Raises:
-        FileNotFoundError: 設定ファイルが見つからない場合
-        json.JSONDecodeError: 設定ファイルのJSONが不正な場合
         SnowparkSessionException: Snowflakeへの接続に失敗した場合
     """
     try:
