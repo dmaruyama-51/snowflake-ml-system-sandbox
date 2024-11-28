@@ -12,6 +12,7 @@ pytest = "^8.3.3"
 pytest-cov = "^6.0.0"
 snowflake-snowpark-python = {extras = ["pandas"], version = "^1.25.0"}
 pytest-mock = "^3.14.0"
+ucimlrepo = "^0.0.7"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -21,3 +22,17 @@ mypy = "^1.13.0"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.coverage.run]
+omit = ["src/adhoc/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "pass",
+    "raise ImportError",
+]
