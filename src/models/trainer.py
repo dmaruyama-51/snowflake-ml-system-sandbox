@@ -29,15 +29,13 @@ def train_model(
     if random_state is None:
         random_state = config["model"]["random_forest"]["random_state"]
 
-    target_column = config["data"]["features"]["target"]
+    target_column = config["data"]["target"]
 
     logger.info(f"モデルの学習を開始 (交差検証分割数: {n_splits})")
     logger.debug(f"入力データのサイズ: {df.shape}")
 
     X: pd.DataFrame = df.drop(target_column, axis=1)
     y: pd.Series = df[target_column]
-    logger.debug(f"特徴量の数: {X.shape[1]}")
-    logger.debug(f"クラス分布: 正例率 {y.mean():.3f}")
 
     # 交差検証
     cv_scores: List[Dict[str, float]] = []
@@ -84,20 +82,6 @@ def train_model(
         final_model = create_model_pipeline(random_state=random_state)
         final_model.fit(X, y)
         logger.info("最終モデルの学習完了")
-
-        # 特徴量重要度のログ出力
-        feature_importances = final_model.named_steps["classifier"].feature_importances_
-        features = (
-            config["data"]["features"]["numeric"]
-            + config["data"]["features"]["categorical"]
-        )
-        importance_dict = dict(zip(features, feature_importances))
-        logger.debug("特徴量重要度:")
-        for feature, importance in sorted(
-            importance_dict.items(), key=lambda x: x[1], reverse=True
-        ):
-            logger.debug(f"  - {feature}: {importance:.4f}")
-
     except Exception as e:
         logger.error(f"最終モデルの学習中にエラーが発生: {str(e)}")
         raise
