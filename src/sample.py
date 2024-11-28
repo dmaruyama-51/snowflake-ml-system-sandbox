@@ -1,2 +1,0 @@
-def sample():
-    assert True
