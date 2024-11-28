@@ -39,7 +39,7 @@ def sample_data():
     return pd.DataFrame(data)
 
 
-def test_train_model_basic(sample_data, caplog):
+def test_train_model_basic(sample_data):
     """基本的な学習プロセスのテスト"""
     # 少ない分割数で実行して時間を節約
     model, cv_scores = train_model(sample_data, n_splits=2, random_state=42)

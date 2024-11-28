@@ -3,7 +3,7 @@ import logging
 from typing import Optional
 import pandas as pd
 from snowflake.snowpark import Session, DataFrame as SnowparkDataFrame
-from snowflake.snowpark.exceptions import SnowparkSessionException
+from snowflake.snowpark.exceptions import SnowparkSessionException, SnowparkSQLException
 
 logger = logging.getLogger(__name__)
 CONNECTION_PARAMETERS_PATH = "connection_parameters.json"
@@ -35,11 +35,23 @@ def create_session() -> Optional[Session]:
         raise SnowparkSessionException(error_msg) from e
 
 
-def fetch_dataframe_from_snowflake(
-    session: Session,
-    query: str,
-) -> pd.DataFrame:
-    return session.sql(query).to_pandas()
+def fetch_dataframe_from_snowflake(session: Session, query: str) -> pd.DataFrame:
+    """Snowflakeからデータを取得してDataFrameに変換"""
+    if not query:
+        raise ValueError("クエリが空です")
+
+    try:
+        logger.info(f"クエリ実行開始: {query[:100]}...")
+        df = session.sql(query).to_pandas()
+        logger.info(f"データ取得完了: {len(df)}行")
+        return df
+
+    except SnowparkSQLException as e:
+        logger.error(f"SQLエラー: {e}")
+        raise
+    except Exception as e:
+        logger.error(f"エラー発生: {e}")
+        raise
 
 
 def upload_dataframe_to_snowflake(
