@@ -37,4 +37,4 @@ def calc_evaluation_metrics(
 
     except Exception as e:
         logger.error(f"評価中にエラーが発生: {str(e)}")
-        raise
+        raise ValueError("評価メトリクスの計算に失敗しました。入力データを確認してください。")
