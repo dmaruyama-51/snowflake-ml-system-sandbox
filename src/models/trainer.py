@@ -4,24 +4,11 @@ import numpy as np
 import logging
 from sklearn.model_selection import StratifiedKFold
 from sklearn.pipeline import Pipeline
-from sklearn.ensemble import RandomForestClassifier
-from src.ml.preprocessing import create_preprocessor
-from src.ml.evaluation import evaluate_predictions
+from src.models.pipeline import create_model_pipeline
+from src.evaluation.metrics import calc_evaluation_metrics
 
 logger = logging.getLogger(__name__)
 
-def create_model_pipeline(random_state: int = 0) -> Pipeline:
-    """モデルパイプラインを作成"""
-    logger.info("モデルパイプラインの作成を開始")
-    pipeline = Pipeline(
-        [
-            ("preprocessor", create_preprocessor()),
-            ("classifier", RandomForestClassifier(random_state=random_state)),
-        ]
-    )
-    logger.debug(f"パイプラインの構成: {[name for name, _ in pipeline.steps]}")
-    logger.info("モデルパイプラインの作成完了")
-    return pipeline
 
 def train_model(
     df: pd.DataFrame, n_splits: int = 5, random_state: int = 0
@@ -29,7 +16,7 @@ def train_model(
     """モデルの学習と交差検証を実行"""
     logger.info(f"モデルの学習を開始 (交差検証分割数: {n_splits})")
     logger.debug(f"入力データのサイズ: {df.shape}")
-    
+
     X: pd.DataFrame = df.drop("REVENUE", axis=1)
     y: pd.Series = df["REVENUE"]
     logger.debug(f"特徴量の数: {X.shape[1]}")
@@ -46,8 +33,7 @@ def train_model(
         X_train, X_val = X.iloc[train_idx], X.iloc[val_idx]
         y_train, y_val = y.iloc[train_idx], y.iloc[val_idx]
         logger.debug(
-            f"Fold {fold} データサイズ - "
-            f"学習: {X_train.shape}, 検証: {X_val.shape}"
+            f"Fold {fold} データサイズ - " f"学習: {X_train.shape}, 検証: {X_val.shape}"
         )
 
         try:
@@ -60,9 +46,9 @@ def train_model(
             y_pred_proba = model.predict_proba(X_val)[:, 1]
 
             logger.info(f"Fold {fold} の評価結果:")
-            metrics = evaluate_predictions(y_val, y_pred, y_pred_proba)
+            metrics = calc_evaluation_metrics(y_val, y_pred, y_pred_proba)
             cv_scores.append(metrics)
-            
+
         except Exception as e:
             logger.error(f"Fold {fold} の学習中にエラーが発生: {str(e)}")
             raise
@@ -81,7 +67,9 @@ def train_model(
         final_model = create_model_pipeline(random_state=random_state)
         final_model.fit(X, y)
         logger.info("最終モデルの学習完了")
-        logger.debug(f"最終モデルの特徴量重要度: {final_model.named_steps['classifier'].feature_importances_}")
+        logger.debug(
+            f"最終モデルの特徴量重要度: {final_model.named_steps['classifier'].feature_importances_}"
+        )
     except Exception as e:
         logger.error(f"最終モデルの学習中にエラーが発生: {str(e)}")
         raise

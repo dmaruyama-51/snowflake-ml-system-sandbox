@@ -36,12 +36,14 @@ def split_data(
     """データをテストデータとそれ以外とに分割"""
     logger.info(f"データの分割を開始 (test_size: {test_size})")
     logger.debug(f"入力データのサイズ: {df.shape}")
-    
+
     train_val, test = train_test_split(df, test_size=test_size, random_state=0)
-    
-    logger.info(f"データ分割完了: 学習検証データ {train_val.shape}, テストデータ {test.shape}")
+
+    logger.info(
+        f"データ分割完了: 学習検証データ {train_val.shape}, テストデータ {test.shape}"
+    )
     logger.debug(f"学習検証データのカラム: {', '.join(train_val.columns)}")
-    
+
     return train_val, test
 
 
@@ -50,7 +52,7 @@ def create_preprocessor() -> ColumnTransformer:
     logger.info("前処理パイプラインの作成を開始")
     logger.debug(f"数値特徴量: {', '.join(NUMERIC_FEATURES)}")
     logger.debug(f"カテゴリ特徴量: {', '.join(CATEGORICAL_FEATURES)}")
-    
+
     preprocessor = ColumnTransformer(
         [
             # randomforestではscalingの必要はないが、別アルゴリズムへの拡張性のため入れておく
@@ -62,7 +64,7 @@ def create_preprocessor() -> ColumnTransformer:
             ),
         ]
     )
-    
+
     logger.info("前処理パイプラインの作成完了")
-    
+
     return preprocessor
