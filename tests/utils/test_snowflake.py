@@ -4,7 +4,6 @@ import pytest
 import pandas as pd
 from snowflake.snowpark import Session
 from snowflake.snowpark.exceptions import SnowparkSessionException, SnowparkSQLException
-from snowflake.snowpark.dataframe import DataFrame as SnowparkDataFrame
 
 from src.utils.snowflake import create_session, upload_dataframe_to_snowflake, fetch_dataframe_from_snowflake
 
