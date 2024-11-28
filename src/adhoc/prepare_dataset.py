@@ -1,4 +1,4 @@
-from ucimlrepo import fetch_ucirepo, Dataset
+from ucimlrepo import fetch_ucirepo
 import pandas as pd
 from src.dwh.snowflake import upload_dataframe_to_snowflake, create_session
 from snowflake.snowpark.session import Session
@@ -26,10 +26,10 @@ def prepare_online_shoppers_data(
     """
     try:
         # データセットの取得
-        dataset: Dataset = fetch_ucirepo(id=468)
+        dataset = fetch_ucirepo(id=468)
         df: pd.DataFrame = dataset.data.features
         df_target: pd.DataFrame = dataset.data.targets
-        df["revenue"] = df_target["revenue"]
+        df["revenue"] = df_target["Revenue"]
 
         # Snowflakeへのアップロード
         upload_dataframe_to_snowflake(

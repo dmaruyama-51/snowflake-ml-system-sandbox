@@ -62,16 +62,24 @@ def upload_dataframe_to_snowflake(
         Exception: Snowflakeへのロード中にエラーが発生した場合
     """
     try:
+        logger.info(
+            f"データフレームのアップロードを開始: {database_name}.{schema_name}.{table_name}"
+        )
+        logger.info(f"アップロードモード: {mode}")
+        logger.info(f"データフレームの行数: {len(df)}")
+        logger.debug(f"データフレームのカラム: {', '.join(df.columns)}")
+
         session.use_database(database_name)
         session.use_schema(schema_name)
 
+        df.columns = df.columns.str.upper()
         snowpark_df: SnowparkDataFrame = session.create_dataframe(df)
-
         full_table_name: str = f"{database_name}.{schema_name}.{table_name}"
+        logger.info(f"テーブルへの書き込みを開始: {full_table_name}")
         snowpark_df.write.mode(mode).save_as_table(full_table_name)
 
         row_count: int = session.table(full_table_name).count()
-        logger.info(f"アップロードされた行数: {row_count}")
+        logger.info(f"アップロード完了。テーブルの総行数: {row_count}")
 
     except Exception as e:
         error_msg = f"データのアップロードに失敗しました: {str(e)}"
