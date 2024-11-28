@@ -1,4 +1,4 @@
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Optional
 import pandas as pd
 import numpy as np
 import logging
@@ -6,19 +6,36 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.pipeline import Pipeline
 from src.models.pipeline import create_model_pipeline
 from src.evaluation.metrics import calc_evaluation_metrics
+from src.utils.config import load_config
 
 logger = logging.getLogger(__name__)
+config = load_config()
 
 
 def train_model(
-    df: pd.DataFrame, n_splits: int = 5, random_state: int = 0
+    df: pd.DataFrame, n_splits: Optional[int] = None, random_state: Optional[int] = None
 ) -> Tuple[Pipeline, List[Dict[str, float]]]:
-    """モデルの学習と交差検証を実行"""
+    """
+    モデルの学習と交差検証を実行
+
+    Args:
+        df: 学習データ
+        n_splits: 交差検証の分割数（Noneの場合はconfig.ymlの値を使用）
+        random_state: 乱数シード（Noneの場合はconfig.ymlの値を使用）
+    """
+    # configから設定値を取得
+    if n_splits is None:
+        n_splits = config["model"]["cv"]["n_splits"]
+    if random_state is None:
+        random_state = config["model"]["random_forest"]["random_state"]
+
+    target_column = config["data"]["features"]["target"]
+
     logger.info(f"モデルの学習を開始 (交差検証分割数: {n_splits})")
     logger.debug(f"入力データのサイズ: {df.shape}")
 
-    X: pd.DataFrame = df.drop("REVENUE", axis=1)
-    y: pd.Series = df["REVENUE"]
+    X: pd.DataFrame = df.drop(target_column, axis=1)
+    y: pd.Series = df[target_column]
     logger.debug(f"特徴量の数: {X.shape[1]}")
     logger.debug(f"クラス分布: 正例率 {y.mean():.3f}")
 
@@ -33,7 +50,7 @@ def train_model(
         X_train, X_val = X.iloc[train_idx], X.iloc[val_idx]
         y_train, y_val = y.iloc[train_idx], y.iloc[val_idx]
         logger.debug(
-            f"Fold {fold} データサイズ - " f"学習: {X_train.shape}, 検証: {X_val.shape}"
+            f"Fold {fold} データサイズ - 学習: {X_train.shape}, 検証: {X_val.shape}"
         )
 
         try:
@@ -67,9 +84,20 @@ def train_model(
         final_model = create_model_pipeline(random_state=random_state)
         final_model.fit(X, y)
         logger.info("最終モデルの学習完了")
-        logger.debug(
-            f"最終モデルの特徴量重要度: {final_model.named_steps['classifier'].feature_importances_}"
+
+        # 特徴量重要度のログ出力
+        feature_importances = final_model.named_steps["classifier"].feature_importances_
+        features = (
+            config["data"]["features"]["numeric"]
+            + config["data"]["features"]["categorical"]
         )
+        importance_dict = dict(zip(features, feature_importances))
+        logger.debug("特徴量重要度:")
+        for feature, importance in sorted(
+            importance_dict.items(), key=lambda x: x[1], reverse=True
+        ):
+            logger.debug(f"  - {feature}: {importance:.4f}")
+
     except Exception as e:
         logger.error(f"最終モデルの学習中にエラーが発生: {str(e)}")
         raise

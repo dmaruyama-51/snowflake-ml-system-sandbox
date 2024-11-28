@@ -35,6 +35,13 @@ def create_session() -> Optional[Session]:
         raise SnowparkSessionException(error_msg) from e
 
 
+def fetch_dataframe_from_snowflake(
+    session: Session,
+    query: str,
+) -> pd.DataFrame:
+    return session.sql(query).to_pandas()
+
+
 def upload_dataframe_to_snowflake(
     session: Session,
     df: pd.DataFrame,
