@@ -23,7 +23,7 @@ def log_to_snowflake(session: Session, message: str) -> None:
     """).collect()
 
 
-def training_sproc(session: Session):
+def training_sproc(session: Session) -> int:
     try:
         df = fetch_dataset(session)
         if df is None:
@@ -35,6 +35,8 @@ def training_sproc(session: Session):
             session,
             f"データセットの分割完了。学習検証データ: {len(df_train_val)}行, テストデータ: {len(df_test)}行",
         )
+
+        return 1
 
     except Exception as e:
         log_to_snowflake(session, f"エラーが発生しました: {str(e)}")

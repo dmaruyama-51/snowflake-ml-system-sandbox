@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
-from src.data.preprocessing import split_data
+from src.data.preprocessing import split_data, create_preprocessor
+from sklearn.compose import ColumnTransformer
 
 
 def test_split_data():
@@ -30,3 +31,18 @@ def test_split_data():
     assert len(dummy_data) == len(train_val) + len(
         test
     ), "分割後のデータ数が元のデータ数と一致しません"
+
+def test_create_preprocessor():
+    """create_preprocessor関数の基本的なテスト"""
+    preprocessor = create_preprocessor()
+    assert isinstance(preprocessor, ColumnTransformer), "返り値がColumnTransformerではありません" 
+
+def test_create_preprocessor_transformers():
+    """前処理パイプラインの構成要素をテスト"""
+    preprocessor = create_preprocessor()
+    transformers = preprocessor.transformers
+
+    # 数値特徴量とカテゴリ特徴量の変換器が存在することを確認
+    transformer_names = [name for name, _, _ in transformers]
+    assert "num" in transformer_names, "数値特徴量の変換器が見つかりません"
+    assert "cat" in transformer_names, "カテゴリ特徴量の変換器が見つかりません"
