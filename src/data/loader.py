@@ -7,6 +7,7 @@ from src.utils.config import load_config
 logger = logging.getLogger(__name__)
 config = load_config()
 
+
 def fetch_dataset(session: Session) -> Optional[pd.DataFrame]:
     """データセットを取得する関数
 
@@ -18,7 +19,7 @@ def fetch_dataset(session: Session) -> Optional[pd.DataFrame]:
     """
 
     try:
-        schema = config["data"]["snowflake"]["schema"] 
+        schema = config["data"]["snowflake"]["schema"]
         table = config["data"]["snowflake"]["table"]
         categorical_features = config["data"]["features"]["categorical"]
         numerical_features = config["data"]["features"]["numeric"]
