@@ -1,39 +1,15 @@
 from src.dwh.snowflake import create_session
 from snowflake.snowpark import Session
+from src.data.loader import fetch_dataset
 import sys
 import os
-
-SCHEMA = "ml"
-TABLE = "online_shoppers_intention"
-TARGET = "REVENUE"
-CATEGORICAL_FEATURES = [
-    "MONTH",
-    "BROWSER",
-    "REGION",
-    "TRAFFICTYPE",
-    "VISITORTYPE",
-    "WEEKEND",
-]
-NUMERICAL_FEATURES = [
-    "ADMINISTRATIVE",
-    "ADMINISTRATIVE_DURATION",
-    "INFORMATIONAL",
-    "INFORMATIONAL_DURATION",
-    "PRODUCTRELATED",
-    "PRODUCTRELATED_DURATION",
-    "BOUNCERATES",
-    "EXITRATES",
-    "PAGEVALUES",
-    "SPECIALDAY",
-]
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 IMPORTS_DIR = os.path.join(BASE_DIR, "src")
 
-
 def log_to_snowflake(session: Session, message: str) -> None:
     session.sql(f"""
-    INSERT INTO {SCHEMA}.log_trace (
+    INSERT INTO log_trace (
         timestamp,
         event_name,
         message
@@ -45,13 +21,7 @@ def log_to_snowflake(session: Session, message: str) -> None:
     """).collect()
 
 
-def training_sproc(session: Session) -> int:
-    import pandas as pd
-
-    def fetch_dataset(session: Session) -> pd.DataFrame:
-        select_columns = CATEGORICAL_FEATURES + NUMERICAL_FEATURES + [TARGET]
-        query_string = f"SELECT {', '.join(select_columns)} FROM {SCHEMA}.{TABLE}"
-        return session.sql(query_string).to_pandas()
+def training_sproc(session: Session) -> int: 
 
     df = fetch_dataset(session)
     log_to_snowflake(session, f"データセットのフェッチ完了。行数: {len(df)}")
@@ -72,6 +42,9 @@ if __name__ == "__main__":
                 "scikit-learn",
                 "pandas",
                 "numpy",
+            ],
+            "imports": [
+                (os.path.join(IMPORTS_DIR, "data"), "src.data")
             ],
             "replace": True,
             "execute_as": "caller",
