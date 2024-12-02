@@ -1,6 +1,7 @@
+import os
 import json
 import logging
-from typing import Optional
+from typing import Optional, List
 import pandas as pd
 from snowflake.snowpark import Session, DataFrame as SnowparkDataFrame
 from snowflake.snowpark.exceptions import SnowparkSessionException, SnowparkSQLException
@@ -104,3 +105,69 @@ def upload_dataframe_to_snowflake(
         error_msg = f"データのアップロードに失敗しました: {str(e)}"
         logger.error(error_msg)
         raise
+
+def upload_files_to_stage(
+    session: Session,
+    local_path: str,
+    stage_name: str,
+    sub_path: str = None
+) -> List[str]:
+    """
+    ローカルファイルをSnowflakeステージにアップロード
+
+    Args:
+        session: Snowflakeセッション
+        local_path: アップロードするローカルディレクトリパス
+        stage_name: ステージ名（例: "@practice.ml.modules"）
+        sub_path: ステージ内のサブパス（例: "src"）
+
+    Returns:
+        List[str]: アップロードされたファイルのリスト
+    """
+    logger.info(f"ファイルアップロード開始: {stage_name}")
+    logger.debug(f"パラメータ - local_path: {local_path}, stage_name: {stage_name}, sub_path: {sub_path}")
+
+    try:
+        uploaded_files = []
+        
+        # ディレクトリ内のファイルを再帰的に処理
+        for root, _, files in os.walk(local_path):
+            logger.debug(f"ディレクトリ処理中: {root}")
+            for file in files:
+                if file.endswith('.py') or file.endswith('.yml') or file.endswith('.json'):
+                    local_file_path = os.path.join(root, file)
+                    relative_path = os.path.relpath(local_file_path, local_path)
+                    stage_path_sub = "/".join(relative_path.split("/")[:-1])
+                    
+                    # ステージパスの構築
+                    stage_path = stage_name
+                    if sub_path:
+                        stage_path = f"{stage_name}/{sub_path}"
+                    
+                    logger.debug(f"アップロード試行 - ファイル: {relative_path}, ステージパス: {stage_path}")
+                    
+                    try:
+                        # ファイルをアップロード
+                        session.file.put(
+                            local_file_path,
+                            f"{stage_path}/{stage_path_sub}",
+                            auto_compress=False, # True にすると圧縮ファイルとしてアップロードされる
+                            overwrite=True
+                        )
+                        
+                        uploaded_files.append(relative_path)
+                        logger.info(f"アップロード成功: {relative_path}")
+                    
+                    except Exception as upload_error:
+                        logger.error(f"個別ファイルのアップロード失敗 - {relative_path}: {str(upload_error)}")
+                        raise
+        
+        logger.info(f"アップロード完了 - 合計ファイル数: {len(uploaded_files)}")
+        return uploaded_files
+
+    except Exception as e:
+        logger.error(f"ファイルアップロード中にエラーが発生: {str(e)}", exc_info=True)
+        raise RuntimeError(f"ファイルアップロード中にエラーが発生: {str(e)}")
+
+    finally:
+        logger.debug("アップロード処理終了")
