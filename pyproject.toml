@@ -13,6 +13,7 @@ pytest-cov = "^6.0.0"
 snowflake-snowpark-python = {extras = ["pandas"], version = "^1.25.0"}
 pytest-mock = "^3.14.0"
 ucimlrepo = "^0.0.7"
+snowflake-telemetry-python = "^0.5.0"
 
 
 [tool.poetry.group.dev.dependencies]
