@@ -3,6 +3,7 @@ from src.data.loader import fetch_dataset
 from src.data.preprocessing import split_data
 from src.models.trainer import train_model
 from snowflake.snowpark import Session
+from snowflake.ml.registry import Registry
 import sys
 import os
 
@@ -37,8 +38,18 @@ def training_sproc(session: Session) -> int:
             f"データセットの分割完了。学習検証データ: {len(df_train_val)}行, テストデータ: {len(df_test)}行",
         )
 
-        _ = train_model(df_train_val)
+        model_pipeline, val_scores = train_model(df_train_val)
         log_to_snowflake(session, "モデルの学習完了")
+
+        registry = Registry(session=session)
+        _ = registry.log_model(
+            model=model_pipeline,
+            model_name="random_forest",
+            version_name="v1",
+            metrics=val_scores[0],
+            sample_input_data=df_train_val.head(1),  # サンプル入力データを追加
+        )
+        log_to_snowflake(session, "モデルのログ完了")
 
         return 1
 
@@ -56,6 +67,7 @@ if __name__ == "__main__":
             "stage_location": "@practice.ml.sproc",
             "packages": [
                 "snowflake-snowpark-python",
+                "snowflake-ml-python",
                 "scikit-learn",
                 "pandas",
                 "numpy",

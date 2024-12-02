@@ -27,7 +27,7 @@ def fetch_dataset(session: Session) -> Optional[pd.DataFrame]:
         logger.info(f"{schema}.{table}からデータセット取得を開始")
 
         select_columns = categorical_features + numerical_features + target
-        query_string = f"SELECT {', '.join(select_columns)} FROM {table}.{table}"
+        query_string = f"SELECT {', '.join(select_columns)} FROM {schema}.{table}"
         df = session.sql(query_string).to_pandas()
 
         # 取得成功時のログ

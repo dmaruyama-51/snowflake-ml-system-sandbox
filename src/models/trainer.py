@@ -53,12 +53,12 @@ def train_model(
 
         try:
             # モデルの学習と評価
-            model = create_model_pipeline(random_state=random_state)
-            model.fit(X_train, y_train)
+            model_pipeline = create_model_pipeline(random_state=random_state)
+            model_pipeline.fit(X_train, y_train)
             logger.debug(f"Fold {fold} のモデル学習完了")
 
-            y_pred = model.predict(X_val)
-            y_pred_proba = model.predict_proba(X_val)[:, 1]
+            y_pred = model_pipeline.predict(X_val)
+            y_pred_proba = model_pipeline.predict_proba(X_val)[:, 1]
 
             logger.info(f"Fold {fold} の評価結果:")
             metrics = calc_evaluation_metrics(y_val, y_pred, y_pred_proba)
@@ -79,11 +79,11 @@ def train_model(
     # 最終モデルの学習
     logger.info("最終モデルの学習を開始")
     try:
-        final_model = create_model_pipeline(random_state=random_state)
-        final_model.fit(X, y)
+        final_model_pipeline = create_model_pipeline(random_state=random_state)
+        final_model_pipeline.fit(X, y)
         logger.info("最終モデルの学習完了")
     except Exception as e:
         logger.error(f"最終モデルの学習中にエラーが発生: {str(e)}")
         raise
 
-    return final_model, cv_scores
+    return final_model_pipeline, cv_scores

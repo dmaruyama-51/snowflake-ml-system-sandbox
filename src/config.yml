@@ -1,5 +1,6 @@
 data:
   snowflake:
+    database: "practice"
     schema: "ml"
     table: "online_shoppers_intention"
 
