@@ -1,6 +1,7 @@
 from src.utils.snowflake import create_session
 from src.data.loader import fetch_dataset
 from src.data.preprocessing import split_data
+from src.models.trainer import train_model
 from snowflake.snowpark import Session
 import sys
 import os
@@ -36,6 +37,9 @@ def training_sproc(session: Session) -> int:
             f"データセットの分割完了。学習検証データ: {len(df_train_val)}行, テストデータ: {len(df_test)}行",
         )
 
+        _ = train_model(df_train_val)
+        log_to_snowflake(session, "モデルの学習完了")
+
         return 1
 
     except Exception as e:
@@ -58,6 +62,8 @@ if __name__ == "__main__":
             ],
             "imports": [
                 (os.path.join(IMPORTS_DIR, "data"), "src.data"),
+                (os.path.join(IMPORTS_DIR, "models"), "src.models"),
+                (os.path.join(IMPORTS_DIR, "evaluation"), "src.evaluation"),
                 (os.path.join(IMPORTS_DIR, "utils/config.py"), "src.utils.config"),
                 os.path.join(IMPORTS_DIR, "config.yml"),
             ],

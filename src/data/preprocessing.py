@@ -27,6 +27,7 @@ def split_data(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
     )
     return train_val, test
 
+
 def create_preprocessor() -> ColumnTransformer:
     """特徴量の前処理パイプラインを作成"""
     numeric_features = config["data"]["features"]["numeric"]

@@ -32,10 +32,14 @@ def test_split_data():
         test
     ), "分割後のデータ数が元のデータ数と一致しません"
 
+
 def test_create_preprocessor():
     """create_preprocessor関数の基本的なテスト"""
     preprocessor = create_preprocessor()
-    assert isinstance(preprocessor, ColumnTransformer), "返り値がColumnTransformerではありません" 
+    assert isinstance(
+        preprocessor, ColumnTransformer
+    ), "返り値がColumnTransformerではありません"
+
 
 def test_create_preprocessor_transformers():
     """前処理パイプラインの構成要素をテスト"""
