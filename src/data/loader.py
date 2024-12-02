@@ -29,6 +29,7 @@ NUMERICAL_FEATURES = [
 
 logger = logging.getLogger(__name__)
 
+
 def fetch_dataset(session: Session) -> Optional[pd.DataFrame]:
     """データセットを取得する関数
 
@@ -38,15 +39,15 @@ def fetch_dataset(session: Session) -> Optional[pd.DataFrame]:
     Returns:
         Optional[pd.DataFrame]: 取得したデータフレーム。エラー時はNone
     """
-    
+
     try:
         # クエリ実行前のログ
         logger.info(f"{SCHEMA}.{TABLE}からデータセット取得を開始")
-        
+
         select_columns = CATEGORICAL_FEATURES + NUMERICAL_FEATURES + [TARGET]
         query_string = f"SELECT {', '.join(select_columns)} FROM {SCHEMA}.{TABLE}"
         df = session.sql(query_string).to_pandas()
-        
+
         # 取得成功時のログ
         logger.info(f"データセット取得完了: {len(df)}行")
         return df
