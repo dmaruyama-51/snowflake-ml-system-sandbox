@@ -2,33 +2,10 @@ import pandas as pd
 from snowflake.snowpark import Session
 import logging
 from typing import Optional
-
-SCHEMA = "ml"
-TABLE = "online_shoppers_intention"
-TARGET = "REVENUE"
-CATEGORICAL_FEATURES = [
-    "MONTH",
-    "BROWSER",
-    "REGION",
-    "TRAFFICTYPE",
-    "VISITORTYPE",
-    "WEEKEND",
-]
-NUMERICAL_FEATURES = [
-    "ADMINISTRATIVE",
-    "ADMINISTRATIVE_DURATION",
-    "INFORMATIONAL",
-    "INFORMATIONAL_DURATION",
-    "PRODUCTRELATED",
-    "PRODUCTRELATED_DURATION",
-    "BOUNCERATES",
-    "EXITRATES",
-    "PAGEVALUES",
-    "SPECIALDAY",
-]
+from src.utils.config import load_config
 
 logger = logging.getLogger(__name__)
-
+config = load_config()
 
 def fetch_dataset(session: Session) -> Optional[pd.DataFrame]:
     """データセットを取得する関数
@@ -41,11 +18,16 @@ def fetch_dataset(session: Session) -> Optional[pd.DataFrame]:
     """
 
     try:
+        schema = config["data"]["snowflake"]["schema"] 
+        table = config["data"]["snowflake"]["table"]
+        categorical_features = config["data"]["features"]["categorical"]
+        numerical_features = config["data"]["features"]["numeric"]
+        target = config["data"]["target"]
         # クエリ実行前のログ
-        logger.info(f"{SCHEMA}.{TABLE}からデータセット取得を開始")
+        logger.info(f"{schema}.{table}からデータセット取得を開始")
 
-        select_columns = CATEGORICAL_FEATURES + NUMERICAL_FEATURES + [TARGET]
-        query_string = f"SELECT {', '.join(select_columns)} FROM {SCHEMA}.{TABLE}"
+        select_columns = categorical_features + numerical_features + target
+        query_string = f"SELECT {', '.join(select_columns)} FROM {table}.{table}"
         df = session.sql(query_string).to_pandas()
 
         # 取得成功時のログ
