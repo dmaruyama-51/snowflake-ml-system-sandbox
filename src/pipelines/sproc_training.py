@@ -7,7 +7,7 @@ from snowflake.ml.registry import Registry
 import sys
 import os
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 IMPORTS_DIR = os.path.join(BASE_DIR, "src")
 
 
@@ -75,7 +75,6 @@ if __name__ == "__main__":
             "imports": [
                 (os.path.join(IMPORTS_DIR, "data"), "src.data"),
                 (os.path.join(IMPORTS_DIR, "models"), "src.models"),
-                (os.path.join(IMPORTS_DIR, "evaluation"), "src.evaluation"),
                 (os.path.join(IMPORTS_DIR, "utils/config.py"), "src.utils.config"),
                 os.path.join(IMPORTS_DIR, "config.yml"),
             ],
