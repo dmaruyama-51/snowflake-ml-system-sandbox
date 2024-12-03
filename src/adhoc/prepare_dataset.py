@@ -33,12 +33,24 @@ def prepare_online_shoppers_data(
 
         # MONTHカラムの値を月番号に変換する辞書を作成
         month_to_num = {
-            'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04', 'May': '05', 'June': '06',
-            'Jul': '07', 'Aug': '08', 'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12'
+            "Jan": "01",
+            "Feb": "02",
+            "Mar": "03",
+            "Apr": "04",
+            "May": "05",
+            "June": "06",
+            "Jul": "07",
+            "Aug": "08",
+            "Sep": "09",
+            "Oct": "10",
+            "Nov": "11",
+            "Dec": "12",
         }
 
         # 月しかわからないため、日付は 2024-xx-01 とする
-        df['SESSION_DATE'] = pd.to_datetime("2024" + df['Month'].map(month_to_num) + "01")
+        df["SESSION_DATE"] = pd.to_datetime(
+            "2024" + df["Month"].map(month_to_num) + "01"
+        )
 
         # Snowflakeへのアップロード
         upload_dataframe_to_snowflake(

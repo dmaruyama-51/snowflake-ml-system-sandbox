@@ -27,7 +27,7 @@ def fetch_dataset(session: Session) -> Optional[pd.DataFrame]:
         categorical_features = config["data"]["features"]["categorical"]
         numerical_features = config["data"]["features"]["numeric"]
         target = config["data"]["target"]
-        
+
         logger.info(f"{schema}.{table}からデータセット取得を開始")
         select_columns = categorical_features + numerical_features + target
 
