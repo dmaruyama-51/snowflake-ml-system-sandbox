@@ -19,7 +19,7 @@ def load_config(config_path: Optional[str] = None) -> Dict[str, Any]:
     """
     if config_path is None:
         root_dir = Path(__file__).parent.parent.parent
-        
+
         # CI環境またはローカル環境の場合
         if "snowflake_import_directory" not in sys._xoptions:
             config_path = f"{root_dir}/src/config.yml"
