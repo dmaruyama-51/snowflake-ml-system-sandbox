@@ -11,7 +11,7 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 IMPORTS_DIR = os.path.join(BASE_DIR, "src")
 
-def training_sproc(session: Session) -> int:
+def sproc_training(session: Session) -> int:
     try:
         df = fetch_dataset(session, is_training=True)
         if df is None:
@@ -68,7 +68,7 @@ if __name__ == "__main__":
             "replace": True,
             "execute_as": "caller",
         }
-        session.sproc.register(func=training_sproc, **sproc_config)  # type: ignore
+        session.sproc.register(func=sproc_training, **sproc_config)  # type: ignore
 
     except Exception as e:
         print(f"エラーが発生しました: {str(e)}")
