@@ -35,6 +35,7 @@ exclude_lines = [
     "if self.debug:",
     "raise NotImplementedError",
     "if __name__ == .__main__.:",
+    "^\\s*logger\\.\\w+\\(.*\\)",
+    "^\\s*logging\\.\\w+\\(.*\\)",
     "pass",
-    "raise ImportError",
 ]
