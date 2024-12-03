@@ -18,6 +18,7 @@ from src.utils.config import load_config
 logger = logging.getLogger(__name__)
 config = load_config()
 
+
 def create_model_pipeline(random_state: int = 0) -> Pipeline:
     """モデルパイプラインを作成"""
     logger.info("モデルパイプラインの作成を開始")
@@ -30,6 +31,7 @@ def create_model_pipeline(random_state: int = 0) -> Pipeline:
     logger.debug(f"パイプラインの構成: {[name for name, _ in pipeline.steps]}")
     logger.info("モデルパイプラインの作成完了")
     return pipeline
+
 
 def calc_evaluation_metrics(
     y_true: np.ndarray, y_pred: np.ndarray, y_pred_proba: np.ndarray
@@ -59,6 +61,7 @@ def calc_evaluation_metrics(
         raise ValueError(
             "評価メトリクスの計算に失敗しました。入力データを確認してください。"
         )
+
 
 def train_model(
     df: pd.DataFrame, n_splits: Optional[int] = None, random_state: Optional[int] = None

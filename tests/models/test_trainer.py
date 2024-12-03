@@ -1,7 +1,11 @@
 import pytest
 import pandas as pd
 import numpy as np
-from src.models.trainer import train_model, create_model_pipeline, calc_evaluation_metrics
+from src.models.trainer import (
+    train_model,
+    create_model_pipeline,
+    calc_evaluation_metrics,
+)
 from src.utils.config import load_config
 from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestClassifier
