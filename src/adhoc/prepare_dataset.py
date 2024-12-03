@@ -1,6 +1,6 @@
 from ucimlrepo import fetch_ucirepo
 import pandas as pd
-from src.dwh.snowflake import upload_dataframe_to_snowflake, create_session
+from src.utils.snowflake import upload_dataframe_to_snowflake, create_session
 from snowflake.snowpark.session import Session
 
 
