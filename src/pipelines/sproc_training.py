@@ -1,4 +1,5 @@
 from src.utils.snowflake import create_session
+from src.utils.logger import log_to_snowflake
 from src.data.loader import fetch_dataset
 from src.data.preprocessing import split_data
 from src.models.trainer import train_model
@@ -9,21 +10,6 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 IMPORTS_DIR = os.path.join(BASE_DIR, "src")
-
-
-def log_to_snowflake(session: Session, message: str) -> None:
-    session.sql(f"""
-    INSERT INTO log_trace (
-        timestamp,
-        event_name,
-        message
-    ) VALUES (
-        CURRENT_TIMESTAMP(),
-        'TRAINING_LOG',
-        '{message}'
-    )
-    """).collect()
-
 
 def training_sproc(session: Session) -> int:
     try:
@@ -76,6 +62,7 @@ if __name__ == "__main__":
                 (os.path.join(IMPORTS_DIR, "data"), "src.data"),
                 (os.path.join(IMPORTS_DIR, "models"), "src.models"),
                 (os.path.join(IMPORTS_DIR, "utils/config.py"), "src.utils.config"),
+                (os.path.join(IMPORTS_DIR, "utils/logger.py"), "src.utils.logger"),
                 os.path.join(IMPORTS_DIR, "config.yml"),
             ],
             "replace": True,

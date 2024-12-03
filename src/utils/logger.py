@@ -1,49 +1,66 @@
 import logging.config
 from pathlib import Path
+from snowflake.snowpark import Session
 
-# ログファイルを保存するディレクトリを設定
-LOG_DIR = Path("logs")
-LOG_DIR.mkdir(exist_ok=True)
-
-LOGGING_CONFIG = {
-    "version": 1,
-    # ログの出力形式を定義
-    "formatters": {
-        "standard": {
-            "format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
-            # %(asctime)s: タイムスタンプ
-            # %(levelname)s: ログレベル（INFO, ERROR等）
-            # %(name)s: ロガー名（モジュール名）
-            # %(message)s: ログメッセージ
-        }
-    },
-    # ログの出力先を定義
-    "handlers": {
-        # コンソールへの出力設定
-        "console": {
-            "class": "logging.StreamHandler",
-            "level": "INFO",  # INFO以上のログレベルを出力
-            "formatter": "standard",
+# ロァイルハンドラーを条件付きで設定
+def get_logging_config():
+    """環境に応じたロギング設定を返す"""
+    config = {
+        "version": 1,
+        "formatters": {
+            "standard": {
+                "format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+            }
         },
-        # ファイルへの出力設定
-        "file": {
+        "handlers": {
+            "console": {
+                "class": "logging.StreamHandler",
+                "level": "INFO",
+                "formatter": "standard",
+            }
+        },
+        "loggers": {
+            "src": {
+                "level": "DEBUG",
+                "handlers": ["console"],
+            }
+        },
+    }
+    
+    # ローカル環境の場合のみファイルハンドラーを追加
+    try:
+        log_dir = Path("logs")
+        log_dir.mkdir(exist_ok=True)
+        
+        config["handlers"]["file"] = {
             "class": "logging.handlers.RotatingFileHandler",
-            "level": "DEBUG",  # DEBUG以上のログレベルを出力
+            "level": "DEBUG",
             "formatter": "standard",
-            "filename": LOG_DIR / "app.log",
-            "maxBytes": 10485760,  # ファイルの最大サイズ（10MB）
-            "backupCount": 3,  # 保持する過去ログファイルの数
-        },
-    },
-    "loggers": {
-        "src": {  # srcパッケージ配下のロガー設定
-            "level": "DEBUG",  # DEBUG以上のログレベルを処理
-            "handlers": ["console", "file"],
+            "filename": log_dir / "app.log",
+            "maxBytes": 10485760,
+            "backupCount": 3,
         }
-    },
-}
-
+        config["loggers"]["src"]["handlers"].append("file")
+    except OSError:
+        # ファイルシステムが読み取り専用の場合はスキップ
+        pass
+    
+    return config
 
 def setup_logging():
     """ロギング設定を初期化"""
-    logging.config.dictConfig(LOGGING_CONFIG)
+    logging.config.dictConfig(get_logging_config())
+
+def log_to_snowflake(session: Session, message: str) -> None:
+    """Snowflakeにログを記録"""
+    session.sql(f"""
+    INSERT INTO log_trace (
+        timestamp,
+        event_name,
+        message
+    ) VALUES (
+        CURRENT_TIMESTAMP(),
+        'TRAINING_LOG',
+        '{message}'
+    )
+    """).collect()

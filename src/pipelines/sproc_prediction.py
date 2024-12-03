@@ -2,6 +2,7 @@ import os
 import sys
 from snowflake.snowpark import Session
 from src.utils.snowflake import create_session
+from src.utils.logger import log_to_snowflake
 from src.data.loader import fetch_dataset
 from src.models.predictor import load_latest_model, predict
 
@@ -10,14 +11,31 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 IMPORTS_DIR = os.path.join(BASE_DIR, "src")
 
 def sproc_prediction(session: Session) -> int:
-    """推論用のSprocを登録する関数"""
+    """
+    推論Sprocの処理内容
+    
+    Args:
+        session (Session): Snowflakeセッション
+        
+    Returns:
+        int: 成功時は1、失敗時は例外を発生
+        
+    Raises:
+        Exception: 処理中にエラーが発生した場合
+    """
+    log_to_snowflake(session, "推論処理を開始")
     try:
         df = fetch_dataset(session, is_training=False)
         if df is None:
             raise ValueError("データセットが取得できませんでした")
+        log_to_snowflake(session, f"データセットのフェッチ完了。行数: {len(df)}")
 
         model = load_latest_model(session)
+        log_to_snowflake(session, "モデルの読み込み完了")
         _ = predict(df, model)
+        log_to_snowflake(session, "推論完了")
+
+        # ToDo: 推論結果をスコアテーブルに書き込み
         
         return 1
 
@@ -43,6 +61,7 @@ if __name__ == "__main__":
                 (os.path.join(IMPORTS_DIR, "data"), "src.data"),
                 (os.path.join(IMPORTS_DIR, "models"), "src.models"),
                 (os.path.join(IMPORTS_DIR, "utils/config.py"), "src.utils.config"),
+                (os.path.join(IMPORTS_DIR, "utils/logger.py"), "src.utils.logger"),
                 os.path.join(IMPORTS_DIR, "config.yml")
             ],
             "replace": True,
