@@ -19,16 +19,23 @@ def fetch_dataset(session: Session) -> Optional[pd.DataFrame]:
     """
 
     try:
+        # config からデータセットの期間、特徴量を取得
         schema = config["data"]["snowflake"]["schema"]
         table = config["data"]["snowflake"]["table"]
+        start_date = config["data"]["period"]["start_date"]
+        end_date = config["data"]["period"]["end_date"]
         categorical_features = config["data"]["features"]["categorical"]
         numerical_features = config["data"]["features"]["numeric"]
         target = config["data"]["target"]
-        # クエリ実行前のログ
+        
         logger.info(f"{schema}.{table}からデータセット取得を開始")
-
         select_columns = categorical_features + numerical_features + target
-        query_string = f"SELECT {', '.join(select_columns)} FROM {schema}.{table}"
+
+        query_string = f"""
+            SELECT {', '.join(select_columns)} 
+            FROM {schema}.{table}
+            WHERE SESSION_DATE BETWEEN '{start_date}' AND '{end_date}'
+        """
         df = session.sql(query_string).to_pandas()
 
         # 取得成功時のログ
