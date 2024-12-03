@@ -24,7 +24,7 @@ def load_config(config_path: Optional[str] = None) -> Dict[str, Any]:
         if str(root_dir).split("/")[1] == "Users":
             config_path = f"{root_dir}/src/config.yml"
         # ストアドプロシージャ内で実行されている場合
-        else: # pragma: no cover
+        else:  # pragma: no cover
             config_path = os.path.join(
                 sys._xoptions["snowflake_import_directory"], "config.yml"
             )
