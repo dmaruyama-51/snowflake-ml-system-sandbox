@@ -19,9 +19,9 @@ def load_config(config_path: Optional[str] = None) -> Dict[str, Any]:
     """
     if config_path is None:
         root_dir = Path(__file__).parent.parent.parent
-
-        # ローカル実行の場合
-        if str(root_dir).split("/")[1] == "Users":
+        
+        # CI環境またはローカル環境の場合
+        if "snowflake_import_directory" not in sys._xoptions:
             config_path = f"{root_dir}/src/config.yml"
         # ストアドプロシージャ内で実行されている場合
         else:  # pragma: no cover
