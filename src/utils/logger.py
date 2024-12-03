@@ -1,6 +1,8 @@
 import logging.config
 from pathlib import Path
+
 from snowflake.snowpark import Session
+
 
 # ロァイルハンドラーを条件付きで設定
 def get_logging_config():
@@ -8,9 +10,7 @@ def get_logging_config():
     config = {
         "version": 1,
         "formatters": {
-            "standard": {
-                "format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
-            }
+            "standard": {"format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s"}
         },
         "handlers": {
             "console": {
@@ -26,12 +26,12 @@ def get_logging_config():
             }
         },
     }
-    
+
     # ローカル環境の場合のみファイルハンドラーを追加
     try:
         log_dir = Path("logs")
         log_dir.mkdir(exist_ok=True)
-        
+
         config["handlers"]["file"] = {
             "class": "logging.handlers.RotatingFileHandler",
             "level": "DEBUG",
@@ -44,12 +44,14 @@ def get_logging_config():
     except OSError:
         # ファイルシステムが読み取り専用の場合はスキップ
         pass
-    
+
     return config
+
 
 def setup_logging():
     """ロギング設定を初期化"""
     logging.config.dictConfig(get_logging_config())
+
 
 def log_to_snowflake(session: Session, message: str) -> None:
     """Snowflakeにログを記録"""

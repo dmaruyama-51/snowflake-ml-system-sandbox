@@ -1,15 +1,18 @@
-from src.utils.snowflake import create_session
-from src.utils.logger import log_to_snowflake
+import os
+import sys
+
+from snowflake.ml.registry import Registry
+from snowflake.snowpark import Session
+
 from src.data.loader import fetch_dataset
 from src.data.preprocessing import split_data
 from src.models.trainer import train_model
-from snowflake.snowpark import Session
-from snowflake.ml.registry import Registry
-import sys
-import os
+from src.utils.logger import log_to_snowflake
+from src.utils.snowflake import create_session
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 IMPORTS_DIR = os.path.join(BASE_DIR, "src")
+
 
 def sproc_training(session: Session) -> int:
     try:

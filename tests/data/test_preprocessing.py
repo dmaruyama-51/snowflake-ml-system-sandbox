@@ -1,7 +1,8 @@
-import pandas as pd
 import numpy as np
-from src.data.preprocessing import split_data, create_preprocessor
+import pandas as pd
 from sklearn.compose import ColumnTransformer
+
+from src.data.preprocessing import create_preprocessor, split_data
 
 
 def test_split_data():

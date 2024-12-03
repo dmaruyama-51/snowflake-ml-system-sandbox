@@ -1,5 +1,6 @@
-import pytest
 import pandas as pd
+import pytest
+
 from src.data.loader import fetch_dataset
 from src.utils.config import load_config
 

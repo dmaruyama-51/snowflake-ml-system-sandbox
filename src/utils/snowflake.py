@@ -1,8 +1,12 @@
 import json
 import logging
 from typing import Optional
+
 import pandas as pd
-from snowflake.snowpark import Session, DataFrame as SnowparkDataFrame
+from snowflake.snowpark import (
+    DataFrame as SnowparkDataFrame,
+    Session,
+)
 from snowflake.snowpark.exceptions import SnowparkSessionException
 
 logger = logging.getLogger(__name__)

@@ -1,7 +1,8 @@
-from ucimlrepo import fetch_ucirepo
 import pandas as pd
-from src.utils.snowflake import upload_dataframe_to_snowflake, create_session
 from snowflake.snowpark.session import Session
+from ucimlrepo import fetch_ucirepo
+
+from src.utils.snowflake import create_session, upload_dataframe_to_snowflake
 
 
 def prepare_online_shoppers_data(

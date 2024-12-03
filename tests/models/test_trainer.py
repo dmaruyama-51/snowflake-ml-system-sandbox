@@ -1,15 +1,16 @@
-import pytest
-import pandas as pd
 import numpy as np
+import pandas as pd
+import pytest
+from sklearn.compose import ColumnTransformer
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.pipeline import Pipeline
+
 from src.models.trainer import (
-    train_model,
-    create_model_pipeline,
     calc_evaluation_metrics,
+    create_model_pipeline,
+    train_model,
 )
 from src.utils.config import load_config
-from sklearn.pipeline import Pipeline
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.compose import ColumnTransformer
 
 config = load_config()
 

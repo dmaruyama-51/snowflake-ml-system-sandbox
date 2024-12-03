@@ -1,8 +1,8 @@
-from snowflake.snowpark import Session
-from snowflake.ml.registry import Registry
-from sklearn.pipeline import Pipeline
-import pandas as pd
 import numpy as np
+import pandas as pd
+from sklearn.pipeline import Pipeline
+from snowflake.ml.registry import Registry
+from snowflake.snowpark import Session
 
 
 def load_latest_model(session: Session) -> Pipeline:

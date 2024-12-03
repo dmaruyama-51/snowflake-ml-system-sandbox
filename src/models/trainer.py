@@ -1,17 +1,19 @@
-from typing import List, Dict, Tuple, Optional
-import pandas as pd
-import numpy as np
 import logging
-from sklearn.model_selection import StratifiedKFold
-from sklearn.pipeline import Pipeline
+from typing import Dict, List, Optional, Tuple
+
+import numpy as np
+import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import (
     accuracy_score,
+    average_precision_score,
     precision_score,
     recall_score,
     roc_auc_score,
-    average_precision_score,
 )
+from sklearn.model_selection import StratifiedKFold
+from sklearn.pipeline import Pipeline
+
 from src.data.preprocessing import create_preprocessor
 from src.utils.config import load_config
 

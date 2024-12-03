@@ -39,3 +39,27 @@ exclude_lines = [
     "^\\s*logging\\.\\w+\\(.*\\)",
     "pass",
 ]
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.isort]
+combine-as-imports = true
+force-wrap-aliases = true
+known-first-party = ["src"]
+
+[tool.ruff.lint]
+# チェックするエラーの種類
+select = [
+    "E",  # pycodestyle errors
+    "F",  # pyflakes
+    "I",  # isort
+]
+# 除外するエラーの種類
+ignore = [
+    "E501",  # line too long, handled by black
+    "B008",  # do not perform function calls in argument defaults
+    "C901",  # too complex
+    "W191",  # indentation contains tabs
+    "B904", # raise ... from ... になっていない場合のエラーを無視
+]

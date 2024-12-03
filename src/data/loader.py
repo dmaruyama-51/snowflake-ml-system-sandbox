@@ -1,7 +1,9 @@
-import pandas as pd
-from snowflake.snowpark import Session
 import logging
 from typing import Optional
+
+import pandas as pd
+from snowflake.snowpark import Session
+
 from src.utils.config import load_config
 
 logger = logging.getLogger(__name__)

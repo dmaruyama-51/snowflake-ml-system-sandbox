@@ -1,10 +1,10 @@
 import json
 
-import pytest
 import pandas as pd
+import pytest
 from snowflake.snowpark import Session
-from snowflake.snowpark.exceptions import SnowparkSessionException
 from snowflake.snowpark.dataframe import DataFrame as SnowparkDataFrame
+from snowflake.snowpark.exceptions import SnowparkSessionException
 
 from src.utils.snowflake import create_session, upload_dataframe_to_snowflake
 
