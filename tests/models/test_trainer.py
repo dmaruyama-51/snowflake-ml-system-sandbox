@@ -1,9 +1,11 @@
 import pytest
 import pandas as pd
 import numpy as np
-from src.models.trainer import train_model
+from src.models.trainer import train_model, create_model_pipeline, calc_evaluation_metrics
 from src.utils.config import load_config
 from sklearn.pipeline import Pipeline
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.compose import ColumnTransformer
 
 config = load_config()
 
@@ -32,6 +34,34 @@ def sample_data():
     y = pd.Series(np.random.randint(0, 2, n_samples), name="REVENUE")
 
     return pd.concat([X, y], axis=1)
+
+
+def test_create_model_pipeline():
+    """モデルパイプライン作成のテスト"""
+    # パイプラインの作成
+    pipeline = create_model_pipeline(random_state=42)
+
+    # 戻り値の型チェック
+    assert isinstance(pipeline, Pipeline), "戻り値がPipelineインスタンスではありません"
+
+    # パイプラインのステップ数チェック
+    assert len(pipeline.steps) == 2, "パイプラインのステップ数が想定と異なります"
+
+    # 各ステップの名前と型のチェック
+    preprocessor_step = pipeline.steps[0]
+    classifier_step = pipeline.steps[1]
+
+    # 前処理ステップのチェック
+    assert preprocessor_step[0] == "preprocessor", "前処理ステップの名前が不正です"
+    assert isinstance(
+        preprocessor_step[1], ColumnTransformer
+    ), "前処理ステップの型が不正です"
+
+    # 分類器ステップのチェック
+    assert classifier_step[0] == "classifier", "分類器ステップの名前が不正です"
+    assert isinstance(
+        classifier_step[1], RandomForestClassifier
+    ), "分類器ステップの型が不正です"
 
 
 def test_train_model_basic(sample_data):
@@ -65,3 +95,36 @@ def test_train_model_predictions(sample_data):
     assert all(pred in [0, 1] for pred in predictions)
     assert probabilities.shape == (len(sample_data), 2)
     assert all(0 <= prob <= 1 for prob in probabilities.flatten())
+
+
+@pytest.fixture
+def sample_metrics_data():
+    """テスト用のサンプルデータを生成"""
+    y_true = np.array([0, 1, 1, 0, 1])
+    y_pred = np.array([0, 1, 1, 0, 0])
+    y_pred_proba = np.array([0.1, 0.9, 0.8, 0.2, 0.4])
+    return y_true, y_pred, y_pred_proba
+
+
+def test_calc_evaluation_metrics_success(sample_metrics_data):
+    """正常系のテスト"""
+    y_true, y_pred, y_pred_proba = sample_metrics_data
+    metrics = calc_evaluation_metrics(y_true, y_pred, y_pred_proba)
+
+    # 必要なメトリクスが全て含まれているか確認
+    expected_metrics = {"Accuracy", "Precision", "Recall", "ROC-AUC", "PR-AUC"}
+    assert set(metrics.keys()) == expected_metrics
+
+    # 各メトリクスが適切な範囲（0-1）に収まっているか確認
+    for value in metrics.values():
+        assert 0 <= value <= 1
+
+
+def test_calc_evaluation_metrics_invalid_input():
+    """異常系: 不正な入力データでのテスト"""
+    y_true = np.array([0, 1])
+    y_pred = np.array([0])  # サイズが異なる
+    y_pred_proba = np.array([0.5])
+
+    with pytest.raises(ValueError):
+        calc_evaluation_metrics(y_true, y_pred, y_pred_proba)
