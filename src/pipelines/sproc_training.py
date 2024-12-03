@@ -27,7 +27,7 @@ def log_to_snowflake(session: Session, message: str) -> None:
 
 def training_sproc(session: Session) -> int:
     try:
-        df = fetch_dataset(session)
+        df = fetch_dataset(session, is_training=True)
         if df is None:
             raise ValueError("データセットが取得できませんでした")
         log_to_snowflake(session, f"データセットのフェッチ完了。行数: {len(df)}")
