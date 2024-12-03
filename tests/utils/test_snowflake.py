@@ -6,7 +6,7 @@ from snowflake.snowpark import Session
 from snowflake.snowpark.exceptions import SnowparkSessionException
 from snowflake.snowpark.dataframe import DataFrame as SnowparkDataFrame
 
-from src.dwh.snowflake import create_session, upload_dataframe_to_snowflake
+from src.utils.snowflake import create_session, upload_dataframe_to_snowflake
 
 TEST_CONNECTION_PARAMS = {
     "account": "test_account",

@@ -1,6 +1,6 @@
 from ucimlrepo import fetch_ucirepo
 import pandas as pd
-from src.dwh.snowflake import upload_dataframe_to_snowflake, create_session
+from src.utils.snowflake import upload_dataframe_to_snowflake, create_session
 from snowflake.snowpark.session import Session
 
 
@@ -30,6 +30,27 @@ def prepare_online_shoppers_data(
         df: pd.DataFrame = dataset.data.features
         df_target: pd.DataFrame = dataset.data.targets
         df["revenue"] = df_target["Revenue"]
+
+        # MONTHカラムの値を月番号に変換する辞書を作成
+        month_to_num = {
+            "Jan": "01",
+            "Feb": "02",
+            "Mar": "03",
+            "Apr": "04",
+            "May": "05",
+            "June": "06",
+            "Jul": "07",
+            "Aug": "08",
+            "Sep": "09",
+            "Oct": "10",
+            "Nov": "11",
+            "Dec": "12",
+        }
+
+        # 月しかわからないため、日付は 2024-xx-01 とする
+        df["SESSION_DATE"] = pd.to_datetime(
+            "2024" + df["Month"].map(month_to_num) + "01"
+        )
 
         # Snowflakeへのアップロード
         upload_dataframe_to_snowflake(

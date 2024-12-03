@@ -1,0 +1,42 @@
+data:
+  snowflake:
+    database: "practice"
+    schema: "ml"
+    table: "online_shoppers_intention"
+
+  period:
+    start_date: "2024-01-01"
+    end_date: "2024-06-01"
+
+  target:
+    - "REVENUE"
+  
+  features:
+    numeric:
+      - "ADMINISTRATIVE"
+      - "ADMINISTRATIVE_DURATION"
+      - "INFORMATIONAL"
+      - "INFORMATIONAL_DURATION"
+      - "PRODUCTRELATED"
+      - "PRODUCTRELATED_DURATION"
+      - "BOUNCERATES"
+      - "EXITRATES"
+      - "PAGEVALUES"
+      - "SPECIALDAY"
+      
+    categorical:
+      - "BROWSER"
+      - "REGION"
+      - "TRAFFICTYPE"
+      - "VISITORTYPE"
+      - "WEEKEND"
+  
+  split:
+    test_size: 0.2
+    random_state: 0
+
+model:
+  cv:
+    n_splits: 5
+  random_forest:
+    random_state: 0
