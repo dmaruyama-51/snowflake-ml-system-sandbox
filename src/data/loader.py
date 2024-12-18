@@ -11,7 +11,7 @@ config = load_config()
 
 
 def fetch_dataset(
-    session: Session, is_training: bool = True, prediction_date: str = None
+    session: Session, is_training: bool = True, prediction_date: Optional[str] = None
 ) -> Optional[pd.DataFrame]:
     """データセットを取得する関数
 
@@ -57,7 +57,7 @@ def fetch_dataset(
         df = session.sql(query_string).to_pandas()
 
         if len(df) == 0:
-            raise ValueError(f"指定期間のデータは存在しません。")
+            raise ValueError("指定期間のデータは存在しません。")
 
         # 取得成功時のログ
         logger.info(f"データセット取得完了: {len(df)}行")

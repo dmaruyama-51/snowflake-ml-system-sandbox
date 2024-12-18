@@ -1,10 +1,11 @@
+from typing import Tuple
+
 import numpy as np
 import pandas as pd
 from sklearn.pipeline import Pipeline
-from snowflake.ml.registry import Registry
 from snowflake.ml.model import ModelVersion
+from snowflake.ml.registry import Registry
 from snowflake.snowpark import Session
-from typing import Tuple
 
 
 def load_latest_model(session: Session) -> Tuple[ModelVersion, Pipeline]:

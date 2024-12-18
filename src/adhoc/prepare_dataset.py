@@ -1,7 +1,9 @@
+import uuid
+
 import pandas as pd
 from snowflake.snowpark.session import Session
 from ucimlrepo import fetch_ucirepo
-import uuid
+
 from src.utils.snowflake import create_session, upload_dataframe_to_snowflake
 
 
