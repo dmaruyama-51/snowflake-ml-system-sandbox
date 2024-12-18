@@ -1,6 +1,6 @@
+import pandas as pd
 import pytest
 from snowflake.snowpark import Session
-import pandas as pd
 
 from src.pipelines.sproc_training import sproc_training
 

@@ -1,8 +1,9 @@
+import pandas as pd
 import pytest
 from snowflake.snowpark import Session
-import pandas as pd
 
 from src.pipelines.sproc_prediction import sproc_prediction
+
 
 def test_sproc_prediction_success(mocker):
     # モックセッションの作成
@@ -41,7 +42,6 @@ def test_sproc_prediction_fetch_dataset_returns_none(mocker):
     mock_session = mocker.Mock(spec=Session)
     mock_fetch = mocker.patch('src.pipelines.sproc_prediction.fetch_dataset')
     mock_fetch.return_value = None
-    mock_log = mocker.patch('src.pipelines.sproc_prediction.log_to_snowflake')
     
     with pytest.raises(SystemExit) as exc_info:
         sproc_prediction(mock_session, "2024-03-20")

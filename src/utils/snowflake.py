@@ -78,9 +78,9 @@ def upload_dataframe_to_snowflake(
 
         df.columns = df.columns.str.upper()
 
+        full_table_name: str = f"{database_name}.{schema_name}.{table_name}"
         # appendモードでSESSION_DATEカラムが存在する場合、既存データを削除
         if mode == "append" and "SESSION_DATE" in df.columns:
-            full_table_name = f"{database_name}.{schema_name}.{table_name}"
             unique_dates = df["SESSION_DATE"].unique()
 
             logger.info(
@@ -93,7 +93,6 @@ def upload_dataframe_to_snowflake(
             session.sql(delete_sql).collect()
 
         snowpark_df: SnowparkDataFrame = session.create_dataframe(df)
-        full_table_name: str = f"{database_name}.{schema_name}.{table_name}"
         logger.info(f"テーブルへの書き込みを開始: {full_table_name}")
         snowpark_df.write.mode(mode).save_as_table(full_table_name)
 
