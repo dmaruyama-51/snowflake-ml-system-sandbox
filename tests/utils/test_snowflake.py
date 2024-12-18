@@ -113,10 +113,7 @@ def test_upload_dataframe_to_snowflake_append_mode(
     """appendモードでSESSION_DATEカラムを含むデータフレームをアップロードする場合"""
     # テストデータの準備
     test_dates = ["2024-01-01", "2024-01-02"]
-    test_df = pd.DataFrame({
-        "SESSION_DATE": test_dates,
-        "col1": [1, 2]
-    })
+    test_df = pd.DataFrame({"SESSION_DATE": test_dates, "col1": [1, 2]})
     test_params = {
         "database_name": "test_db",
         "schema_name": "test_schema",
@@ -132,7 +129,7 @@ def test_upload_dataframe_to_snowflake_append_mode(
 
     # アサーション
     expected_table_name = f"{test_params['database_name']}.{test_params['schema_name']}.{test_params['table_name']}"
-    
+
     # データベースとスキーマの使用
     mock_snowflake_session.use_database.assert_called_once_with(
         test_params["database_name"]
@@ -143,14 +140,14 @@ def test_upload_dataframe_to_snowflake_append_mode(
 
     # 既存データの削除
     expected_delete_sql = f"DELETE FROM {expected_table_name} WHERE SESSION_DATE IN ('2024-01-01','2024-01-02')"
-    
+
     # 実際のSQL呼び出しの取得と正規化
     actual_sql = mock_snowflake_session.sql.call_args[0][0]
-    normalized_actual_sql = ' '.join(actual_sql.split())
-    normalized_expected_sql = ' '.join(expected_delete_sql.split())
-    
+    normalized_actual_sql = " ".join(actual_sql.split())
+    normalized_expected_sql = " ".join(expected_delete_sql.split())
+
     assert normalized_actual_sql == normalized_expected_sql
-    
+
     # データフレームの作成と保存
     mock_snowflake_session.create_dataframe.assert_called_once_with(test_df)
     mock_snowpark_df.write.mode.assert_called_once_with("append")

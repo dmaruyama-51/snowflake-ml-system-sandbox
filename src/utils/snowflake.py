@@ -77,13 +77,15 @@ def upload_dataframe_to_snowflake(
         session.use_schema(schema_name)
 
         df.columns = df.columns.str.upper()
-        
+
         # appendモードでSESSION_DATEカラムが存在する場合、既存データを削除
         if mode == "append" and "SESSION_DATE" in df.columns:
             full_table_name = f"{database_name}.{schema_name}.{table_name}"
             unique_dates = df["SESSION_DATE"].unique()
-            
-            logger.info(f"既存データの削除: SESSION_DATE IN ({', '.join(map(str, unique_dates))})")
+
+            logger.info(
+                f"既存データの削除: SESSION_DATE IN ({', '.join(map(str, unique_dates))})"
+            )
             delete_sql = f"""
                 DELETE FROM {full_table_name}
                 WHERE SESSION_DATE IN ({','.join([f"'{date}'" for date in unique_dates])})
