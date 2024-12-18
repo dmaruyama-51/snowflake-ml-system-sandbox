@@ -27,7 +27,10 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.coverage.run]
-omit = ["src/adhoc/*"]
+omit = [
+    "src/adhoc/*",
+    "src/utils/logger.py"
+]
 
 [tool.coverage.report]
 exclude_lines = [

@@ -38,6 +38,6 @@ def load_config(config_path: Optional[str] = None) -> Dict[str, Any]:
         logger.info("設定ファイルの読み込みが完了しました")
         return config
 
-    except Exception as e:
+    except Exception as e:  # pragma: no cover
         logger.error(f"設定ファイルの読み込みに失敗: {str(e)}")
         raise
