@@ -10,8 +10,6 @@ from snowflake.snowpark import (
 from snowflake.snowpark.exceptions import SnowparkSessionException
 
 logger = logging.getLogger(__name__)
-CONNECTION_PARAMETERS_PATH = "connection_parameters.json"
-
 
 def create_session() -> Optional[Session]:
     """
@@ -25,6 +23,7 @@ def create_session() -> Optional[Session]:
     """
     try:
         logger.info("Snowflakeセッションの作成を開始")
+        CONNECTION_PARAMETERS_PATH = "connection_parameters.json"
         logger.debug(f"設定ファイルを読み込み: {CONNECTION_PARAMETERS_PATH}")
         with open(CONNECTION_PARAMETERS_PATH) as f:
             connection_parameters = json.load(f)
