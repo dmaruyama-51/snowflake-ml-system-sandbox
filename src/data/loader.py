@@ -30,7 +30,7 @@ def fetch_dataset(session: Session, is_training: bool = True) -> Optional[pd.Dat
         target = config["data"]["target"]
 
         logger.info(f"{schema}.{table}からデータセット取得を開始")
-        select_columns = categorical_features + numerical_features + target
+        select_columns = ["UID"] + categorical_features + numerical_features + target
 
         # 学習時と推論時で日付条件を分岐
         if is_training:

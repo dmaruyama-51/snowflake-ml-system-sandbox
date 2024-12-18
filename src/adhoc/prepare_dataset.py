@@ -1,7 +1,7 @@
 import pandas as pd
 from snowflake.snowpark.session import Session
 from ucimlrepo import fetch_ucirepo
-
+import uuid
 from src.utils.snowflake import create_session, upload_dataframe_to_snowflake
 
 
@@ -52,6 +52,8 @@ def prepare_online_shoppers_data(
         df["SESSION_DATE"] = pd.to_datetime(
             "2024" + df["Month"].map(month_to_num) + "01"
         )
+        # ユーザーIDをランダムに生成
+        df["UID"] = [str(uuid.uuid4()) for _ in range(len(df))]
 
         # Snowflakeへのアップロード
         upload_dataframe_to_snowflake(
