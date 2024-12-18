@@ -11,6 +11,7 @@ from snowflake.snowpark.exceptions import SnowparkSessionException
 
 logger = logging.getLogger(__name__)
 
+
 def create_session() -> Optional[Session]:
     """
     snowpark session を作成

@@ -10,7 +10,9 @@ logger = logging.getLogger(__name__)
 config = load_config()
 
 
-def fetch_dataset(session: Session, is_training: bool = True, prediction_date: str = None) -> Optional[pd.DataFrame]:
+def fetch_dataset(
+    session: Session, is_training: bool = True, prediction_date: str = None
+) -> Optional[pd.DataFrame]:
     """データセットを取得する関数
 
     Args:
@@ -40,10 +42,9 @@ def fetch_dataset(session: Session, is_training: bool = True, prediction_date: s
             date_condition = f"SESSION_DATE BETWEEN '{start_date}' AND '{end_date}'"
             logger.info(f"学習用データを取得: 期間 {start_date} から {end_date}")
         else:
-
             if prediction_date is None:
                 raise ValueError("推論時には prediction_date が必要です")
-            
+
             # 推論時は引数の推論日付を条件にする
             date_condition = f"SESSION_DATE = '{prediction_date}'"
             logger.info(f"推論用データを取得: '{prediction_date}'")

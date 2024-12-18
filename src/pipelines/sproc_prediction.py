@@ -43,7 +43,9 @@ def sproc_prediction(session: Session, prediction_date: str) -> int:
         scores_df["SESSION_DATE"] = prediction_date
         scores_df["MODEL_NAME"] = str(mv._model_name)
         scores_df["MODEL_VERSION"] = str(mv._version_name)
-        scores_df = scores_df[["UID", "SESSION_DATE", "MODEL_NAME", "MODEL_VERSION", "SCORE"]]
+        scores_df = scores_df[
+            ["UID", "SESSION_DATE", "MODEL_NAME", "MODEL_VERSION", "SCORE"]
+        ]
         upload_dataframe_to_snowflake(
             session=session,
             df=scores_df,
@@ -79,7 +81,10 @@ if __name__ == "__main__":
                 (os.path.join(IMPORTS_DIR, "models"), "src.models"),
                 (os.path.join(IMPORTS_DIR, "utils/config.py"), "src.utils.config"),
                 (os.path.join(IMPORTS_DIR, "utils/logger.py"), "src.utils.logger"),
-                (os.path.join(IMPORTS_DIR, "utils/snowflake.py"), "src.utils.snowflake"),
+                (
+                    os.path.join(IMPORTS_DIR, "utils/snowflake.py"),
+                    "src.utils.snowflake",
+                ),
                 os.path.join(IMPORTS_DIR, "config.yml"),
             ],
             "replace": True,

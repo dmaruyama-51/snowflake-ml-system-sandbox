@@ -55,9 +55,7 @@ def test_fetch_dataset_inference_mode(mock_snowflake_session):
     # 実行
     prediction_date = "2024-12-01"
     df = fetch_dataset(
-        mock_snowflake_session, 
-        is_training=False, 
-        prediction_date=prediction_date
+        mock_snowflake_session, is_training=False, prediction_date=prediction_date
     )
 
     # アサーション
@@ -102,7 +100,7 @@ def test_fetch_dataset_inference_mode_without_date(mock_snowflake_session):
     """prediction_dateなしで推論モードを実行した場合のテスト"""
     with pytest.raises(RuntimeError) as exc_info:
         fetch_dataset(mock_snowflake_session, is_training=False, prediction_date=None)
-    
+
     assert "推論時には prediction_date が必要です" in str(exc_info.value)
 
 
