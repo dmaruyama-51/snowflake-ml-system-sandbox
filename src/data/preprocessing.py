@@ -1,9 +1,11 @@
-from typing import Tuple
-import pandas as pd
 import logging
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler, OrdinalEncoder
+from typing import Tuple
+
+import pandas as pd
 from sklearn.compose import ColumnTransformer
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import OrdinalEncoder, StandardScaler
+
 from src.utils.config import load_config
 
 logger = logging.getLogger(__name__)

@@ -1,10 +1,10 @@
 import json
 
-import pytest
 import pandas as pd
+import pytest
 from snowflake.snowpark import Session
-from snowflake.snowpark.exceptions import SnowparkSessionException
 from snowflake.snowpark.dataframe import DataFrame as SnowparkDataFrame
+from snowflake.snowpark.exceptions import SnowparkSessionException
 
 from src.utils.snowflake import create_session, upload_dataframe_to_snowflake
 
@@ -110,7 +110,56 @@ def test_upload_dataframe_to_snowflake_success(
 def test_upload_dataframe_to_snowflake_append_mode(
     mock_snowflake_session, mock_snowpark_df
 ):
-    """appendモードでデータフレームをアップロードする場合"""
+    """appendモードでSESSION_DATEカラムを含むデータフレームをアップロードする場合"""
+    # テストデータの準備
+    test_dates = ["2024-01-01", "2024-01-02"]
+    test_df = pd.DataFrame({"SESSION_DATE": test_dates, "col1": [1, 2]})
+    test_params = {
+        "database_name": "test_db",
+        "schema_name": "test_schema",
+        "table_name": "test_table",
+    }
+
+    # SQLの実行結果のモック
+    mock_snowflake_session.sql.return_value.collect = lambda: None
+
+    upload_dataframe_to_snowflake(
+        session=mock_snowflake_session, df=test_df, mode="append", **test_params
+    )
+
+    # アサーション
+    expected_table_name = f"{test_params['database_name']}.{test_params['schema_name']}.{test_params['table_name']}"
+
+    # データベースとスキーマの使用
+    mock_snowflake_session.use_database.assert_called_once_with(
+        test_params["database_name"]
+    )
+    mock_snowflake_session.use_schema.assert_called_once_with(
+        test_params["schema_name"]
+    )
+
+    # 既存データの削除
+    expected_delete_sql = f"DELETE FROM {expected_table_name} WHERE SESSION_DATE IN ('2024-01-01','2024-01-02')"
+
+    # 実際のSQL呼び出しの取得と正規化
+    actual_sql = mock_snowflake_session.sql.call_args[0][0]
+    normalized_actual_sql = " ".join(actual_sql.split())
+    normalized_expected_sql = " ".join(expected_delete_sql.split())
+
+    assert normalized_actual_sql == normalized_expected_sql
+
+    # データフレームの作成と保存
+    mock_snowflake_session.create_dataframe.assert_called_once_with(test_df)
+    mock_snowpark_df.write.mode.assert_called_once_with("append")
+    mock_snowpark_df.write.mode.return_value.save_as_table.assert_called_once_with(
+        expected_table_name
+    )
+
+
+def test_upload_dataframe_to_snowflake_append_mode_without_session_date(
+    mock_snowflake_session, mock_snowpark_df
+):
+    """appendモードでSESSION_DATEカラムを含まないデータフレームをアップロードする場合"""
     # テストデータの準備
     test_df = pd.DataFrame({"col1": [1, 2, 3]})
     test_params = {
@@ -123,13 +172,10 @@ def test_upload_dataframe_to_snowflake_append_mode(
         session=mock_snowflake_session, df=test_df, mode="append", **test_params
     )
 
+    # 既存データの削除が呼ばれていないことを確認
+    mock_snowflake_session.sql.assert_not_called()
+
     expected_table_name = f"{test_params['database_name']}.{test_params['schema_name']}.{test_params['table_name']}"
-    mock_snowflake_session.use_database.assert_called_once_with(
-        test_params["database_name"]
-    )
-    mock_snowflake_session.use_schema.assert_called_once_with(
-        test_params["schema_name"]
-    )
     mock_snowflake_session.create_dataframe.assert_called_once_with(test_df)
     mock_snowpark_df.write.mode.assert_called_once_with("append")
     mock_snowpark_df.write.mode.return_value.save_as_table.assert_called_once_with(

@@ -1,9 +1,10 @@
-from pathlib import Path
-from typing import Dict, Any, Optional
-import yaml
-import sys
-import os
 import logging
+import os
+import sys
+from pathlib import Path
+from typing import Any, Dict, Optional
+
+import yaml
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +38,6 @@ def load_config(config_path: Optional[str] = None) -> Dict[str, Any]:
         logger.info("設定ファイルの読み込みが完了しました")
         return config
 
-    except Exception as e:
+    except Exception as e:  # pragma: no cover
         logger.error(f"設定ファイルの読み込みに失敗: {str(e)}")
         raise

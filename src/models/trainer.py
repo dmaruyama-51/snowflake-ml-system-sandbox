@@ -1,15 +1,68 @@
-from typing import List, Dict, Tuple, Optional
-import pandas as pd
-import numpy as np
 import logging
+from typing import Dict, List, Optional, Tuple
+
+import numpy as np
+import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import (
+    accuracy_score,
+    average_precision_score,
+    precision_score,
+    recall_score,
+    roc_auc_score,
+)
 from sklearn.model_selection import StratifiedKFold
 from sklearn.pipeline import Pipeline
-from src.models.pipeline import create_model_pipeline
+
+from src.data.preprocessing import create_preprocessor
 from src.utils.config import load_config
-from src.evaluation.metrics import calc_evaluation_metrics
 
 logger = logging.getLogger(__name__)
 config = load_config()
+
+
+def create_model_pipeline(random_state: int = 0) -> Pipeline:
+    """モデルパイプラインを作成"""
+    logger.info("モデルパイプラインの作成を開始")
+    pipeline = Pipeline(
+        [
+            ("preprocessor", create_preprocessor()),
+            ("classifier", RandomForestClassifier(random_state=random_state)),
+        ]
+    )
+    logger.debug(f"パイプラインの構成: {[name for name, _ in pipeline.steps]}")
+    logger.info("モデルパイプラインの作成完了")
+    return pipeline
+
+
+def calc_evaluation_metrics(
+    y_true: np.ndarray, y_pred: np.ndarray, y_pred_proba: np.ndarray
+) -> Dict[str, float]:
+    """予測結果を評価し、メトリクスを返す"""
+    logger.info("予測結果の評価を開始")
+    logger.debug(f"データサイズ - y_true: {len(y_true)}, y_pred: {len(y_pred)}")
+
+    try:
+        metrics = {
+            "Accuracy": accuracy_score(y_true, y_pred),
+            "Precision": precision_score(y_true, y_pred),
+            "Recall": recall_score(y_true, y_pred),
+            "ROC-AUC": roc_auc_score(y_true, y_pred_proba),
+            "PR-AUC": average_precision_score(y_true, y_pred_proba),
+        }
+
+        logger.info("=== 評価メトリクス ===")
+        for name, score in metrics.items():
+            logger.info(f"{name}: {score:.3f}")
+
+        logger.info("評価完了")
+        return metrics
+
+    except Exception as e:
+        logger.error(f"評価中にエラーが発生: {str(e)}")
+        raise ValueError(
+            "評価メトリクスの計算に失敗しました。入力データを確認してください。"
+        )
 
 
 def train_model(
@@ -23,10 +76,10 @@ def train_model(
         n_splits: 交差検証の分割数（Noneの場合はconfig.ymlの値を使用）
         random_state: 乱数シード（Noneの場合はconfig.ymlの値を使用）
     """
-    # configから設定値を取得
-    if n_splits is None:
+    # configからデフォルト値を取得
+    if n_splits is None:  # pragma: no cover
         n_splits = config["model"]["cv"]["n_splits"]
-    if random_state is None:
+    if random_state is None:  # pragma: no cover
         random_state = config["model"]["random_forest"]["random_state"]
 
     target_column = config["data"]["target"]
@@ -64,7 +117,7 @@ def train_model(
             metrics = calc_evaluation_metrics(y_val, y_pred, y_pred_proba)
             cv_scores.append(metrics)
 
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.error(f"Fold {fold} の学習中にエラーが発生: {str(e)}")
             raise
 
@@ -82,7 +135,7 @@ def train_model(
         final_model_pipeline = create_model_pipeline(random_state=random_state)
         final_model_pipeline.fit(X, y)
         logger.info("最終モデルの学習完了")
-    except Exception as e:
+    except Exception as e:  # pragma: no cover
         logger.error(f"最終モデルの学習中にエラーが発生: {str(e)}")
         raise
 

@@ -1,33 +1,22 @@
-from src.utils.snowflake import create_session
+import os
+import sys
+
+from snowflake.ml.registry import Registry
+from snowflake.snowpark import Session
+
 from src.data.loader import fetch_dataset
 from src.data.preprocessing import split_data
 from src.models.trainer import train_model
-from snowflake.snowpark import Session
-from snowflake.ml.registry import Registry
-import sys
-import os
+from src.utils.logger import log_to_snowflake
+from src.utils.snowflake import create_session
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 IMPORTS_DIR = os.path.join(BASE_DIR, "src")
 
 
-def log_to_snowflake(session: Session, message: str) -> None:
-    session.sql(f"""
-    INSERT INTO log_trace (
-        timestamp,
-        event_name,
-        message
-    ) VALUES (
-        CURRENT_TIMESTAMP(),
-        'TRAINING_LOG',
-        '{message}'
-    )
-    """).collect()
-
-
-def training_sproc(session: Session) -> int:
+def sproc_training(session: Session) -> int:
     try:
-        df = fetch_dataset(session)
+        df = fetch_dataset(session, is_training=True)
         if df is None:
             raise ValueError("データセットが取得できませんでした")
         log_to_snowflake(session, f"データセットのフェッチ完了。行数: {len(df)}")
@@ -75,14 +64,14 @@ if __name__ == "__main__":
             "imports": [
                 (os.path.join(IMPORTS_DIR, "data"), "src.data"),
                 (os.path.join(IMPORTS_DIR, "models"), "src.models"),
-                (os.path.join(IMPORTS_DIR, "evaluation"), "src.evaluation"),
                 (os.path.join(IMPORTS_DIR, "utils/config.py"), "src.utils.config"),
+                (os.path.join(IMPORTS_DIR, "utils/logger.py"), "src.utils.logger"),
                 os.path.join(IMPORTS_DIR, "config.yml"),
             ],
             "replace": True,
             "execute_as": "caller",
         }
-        session.sproc.register(func=training_sproc, **sproc_config)  # type: ignore
+        session.sproc.register(func=sproc_training, **sproc_config)  # type: ignore
 
     except Exception as e:
         print(f"エラーが発生しました: {str(e)}")
