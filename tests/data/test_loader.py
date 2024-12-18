@@ -53,15 +53,20 @@ def test_fetch_dataset_training_mode(mock_snowflake_session):
 def test_fetch_dataset_inference_mode(mock_snowflake_session):
     """推論モードでのデータ取得テスト"""
     # 実行
-    df = fetch_dataset(mock_snowflake_session, is_training=False)
+    prediction_date = "2024-12-01"
+    df = fetch_dataset(
+        mock_snowflake_session, 
+        is_training=False, 
+        prediction_date=prediction_date
+    )
 
     # アサーション
     assert df is not None
     assert isinstance(df, pd.DataFrame)
 
-    # SQLクエリに推論用の固定日付が含まれていることを確認
+    # SQLクエリに推論用の日付が含まれていることを確認
     sql_query = mock_snowflake_session.sql.call_args[0][0]
-    assert "SESSION_DATE = '2024-12-01'" in sql_query
+    assert f"SESSION_DATE = '{prediction_date}'" in sql_query
 
 
 def test_fetch_dataset_columns(mock_snowflake_session):
@@ -91,3 +96,26 @@ def test_fetch_dataset_error_handling(mocker):
         fetch_dataset(error_session, is_training=True)
 
     assert "データセット取得中にエラーが発生" in str(exc_info.value)
+
+
+def test_fetch_dataset_inference_mode_without_date(mock_snowflake_session):
+    """prediction_dateなしで推論モードを実行した場合のテスト"""
+    with pytest.raises(RuntimeError) as exc_info:
+        fetch_dataset(mock_snowflake_session, is_training=False, prediction_date=None)
+    
+    assert "推論時には prediction_date が必要です" in str(exc_info.value)
+
+
+def test_fetch_dataset_empty_result(mocker):
+    """空のデータセットが返された場合のテスト"""
+    # 空のデータフレームを返すモックセッション
+    empty_session = mocker.Mock()
+    empty_result = mocker.Mock()
+    empty_result.to_pandas.return_value = pd.DataFrame()  # 空のデータフレーム
+    empty_session.sql.return_value = empty_result
+
+    # エラーが発生することを確認
+    with pytest.raises(RuntimeError) as exc_info:
+        fetch_dataset(empty_session, is_training=True)
+
+    assert "指定期間のデータは存在しません" in str(exc_info.value)
