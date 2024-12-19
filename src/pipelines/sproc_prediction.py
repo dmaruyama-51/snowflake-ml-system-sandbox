@@ -4,7 +4,7 @@ import sys
 from snowflake.snowpark import Session
 
 from src.data.loader import fetch_dataset
-from src.models.predictor import load_latest_model, predict
+from src.models.predictor import load_latest_model_version, predict
 from src.utils.logger import log_to_snowflake
 from src.utils.snowflake import create_session, upload_dataframe_to_snowflake
 
@@ -31,11 +31,13 @@ def sproc_prediction(session: Session, prediction_date: str) -> int:
         df = fetch_dataset(session, is_training=False, prediction_date=prediction_date)
         if df is None:
             raise ValueError("データセットが取得できませんでした")
+        features = df.drop(columns=["UID"])
         log_to_snowflake(session, f"データセットのフェッチ完了。行数: {len(df)}")
 
-        mv, model = load_latest_model(session)
+        mv = load_latest_model_version(session)
         log_to_snowflake(session, "モデルの読み込み完了")
-        df["SCORE"] = predict(df, model)
+
+        df["SCORE"] = predict(features, mv)
         log_to_snowflake(session, "推論完了")
 
         # 推論結果をスコアテーブルに書き込み
