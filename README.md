@@ -25,11 +25,12 @@ By combining SessionDate and UID, each record in the dataset is uniquely identif
 - Dependency Management: Poetry
 - Continuous Integration: GitHub Actions
 - Snowflake Features:
+    - Snowpark for Python: A development framework to execute Python directly within Snowflake’s processing engine. 
     - Python Stored Procedures: Wrapping and deploying processing logic.
     - Model Registry: Managing machine learning models.
     - Task Scheduling: Automating daily score computations (Planned).
-    - ML Observability: Tracking model performance and system health (Planned).
     - Feature Store: Managing reusable features for ML models (Planned).
+    - ML Observability: Tracking model performance and system health (Planned).
 
 ## Development Environment
 
