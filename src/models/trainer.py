@@ -22,25 +22,25 @@ config = load_config()
 
 
 def create_model_pipeline(random_state: int = 0) -> Pipeline:
-    """モデルパイプラインを作成"""
-    logger.info("モデルパイプラインの作成を開始")
+    """Create model pipeline"""
+    logger.info("Starting model pipeline creation")
     pipeline = Pipeline(
         [
             ("preprocessor", create_preprocessor()),
             ("classifier", RandomForestClassifier(random_state=random_state)),
         ]
     )
-    logger.debug(f"パイプラインの構成: {[name for name, _ in pipeline.steps]}")
-    logger.info("モデルパイプラインの作成完了")
+    logger.debug(f"Pipeline components: {[name for name, _ in pipeline.steps]}")
+    logger.info("Model pipeline creation completed")
     return pipeline
 
 
 def calc_evaluation_metrics(
     y_true: np.ndarray, y_pred: np.ndarray, y_pred_proba: np.ndarray
 ) -> Dict[str, float]:
-    """予測結果を評価し、メトリクスを返す"""
-    logger.info("予測結果の評価を開始")
-    logger.debug(f"データサイズ - y_true: {len(y_true)}, y_pred: {len(y_pred)}")
+    """Evaluate predictions and return metrics"""
+    logger.info("Starting prediction evaluation")
+    logger.debug(f"Data size - y_true: {len(y_true)}, y_pred: {len(y_pred)}")
 
     try:
         metrics = {
@@ -51,17 +51,17 @@ def calc_evaluation_metrics(
             "PR-AUC": average_precision_score(y_true, y_pred_proba),
         }
 
-        logger.info("=== 評価メトリクス ===")
+        logger.info("=== Evaluation Metrics ===")
         for name, score in metrics.items():
             logger.info(f"{name}: {score:.3f}")
 
-        logger.info("評価完了")
+        logger.info("Evaluation completed")
         return metrics
 
     except Exception as e:
-        logger.error(f"評価中にエラーが発生: {str(e)}")
+        logger.error(f"Error during evaluation: {str(e)}")
         raise ValueError(
-            "評価メトリクスの計算に失敗しました。入力データを確認してください。"
+            "Failed to calculate evaluation metrics. Please check input data."
         )
 
 
@@ -84,8 +84,8 @@ def train_model(
 
     target_column = config["data"]["target"]
 
-    logger.info(f"モデルの学習を開始 (交差検証分割数: {n_splits})")
-    logger.debug(f"入力データのサイズ: {df.shape}")
+    logger.info(f"Starting model training (cross-validation splits: {n_splits})")
+    logger.debug(f"Input data size: {df.shape}")
 
     X: pd.DataFrame = df.drop(target_column, axis=1)
     y: pd.Series = df[target_column]
@@ -95,30 +95,30 @@ def train_model(
     skf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=random_state)
 
     for fold, (train_idx, val_idx) in enumerate(skf.split(X, y), 1):
-        logger.info(f"Fold {fold}/{n_splits} の学習を開始")
+        logger.info(f"Starting training for fold {fold}/{n_splits}")
 
         # データの分割
         X_train, X_val = X.iloc[train_idx], X.iloc[val_idx]
         y_train, y_val = y.iloc[train_idx], y.iloc[val_idx]
         logger.debug(
-            f"Fold {fold} データサイズ - 学習: {X_train.shape}, 検証: {X_val.shape}"
+            f"Fold {fold} data size - train: {X_train.shape}, validation: {X_val.shape}"
         )
 
         try:
             # モデルの学習と評価
             model_pipeline = create_model_pipeline(random_state=random_state)
             model_pipeline.fit(X_train, y_train)
-            logger.debug(f"Fold {fold} のモデル学習完了")
+            logger.debug(f"Model training completed for fold {fold}")
 
             y_pred = model_pipeline.predict(X_val)
             y_pred_proba = model_pipeline.predict_proba(X_val)[:, 1]
 
-            logger.info(f"Fold {fold} の評価結果:")
+            logger.info(f"Fold {fold} evaluation results:")
             metrics = calc_evaluation_metrics(y_val, y_pred, y_pred_proba)
             cv_scores.append(metrics)
 
-        except Exception as e:  # pragma: no cover
-            logger.error(f"Fold {fold} の学習中にエラーが発生: {str(e)}")
+        except Exception as e:
+            logger.error(f"Error during training fold {fold}: {str(e)}")
             raise
 
     # 結果のサマリー
@@ -130,13 +130,13 @@ def train_model(
         logger.info(f"{metric}: {mean_score:.3f} (±{std_score:.3f})")
 
     # 最終モデルの学習
-    logger.info("最終モデルの学習を開始")
+    logger.info("Starting final model training")
     try:
         final_model_pipeline = create_model_pipeline(random_state=random_state)
         final_model_pipeline.fit(X, y)
-        logger.info("最終モデルの学習完了")
-    except Exception as e:  # pragma: no cover
-        logger.error(f"最終モデルの学習中にエラーが発生: {str(e)}")
+        logger.info("Final model training completed")
+    except Exception as e:
+        logger.error(f"Error during final model training: {str(e)}")
         raise
 
     return final_model_pipeline, cv_scores

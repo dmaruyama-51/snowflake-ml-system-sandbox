@@ -32,7 +32,7 @@ def fetch_dataset(
         numerical_features = config["data"]["features"]["numeric"]
         target = config["data"]["target"]
 
-        logger.info(f"{schema}.{table}からデータセット取得を開始")
+        logger.info(f"Starting dataset retrieval from {schema}.{table}")
         select_columns = ["UID"] + categorical_features + numerical_features + target
 
         # 学習時と推論時で日付条件を分岐
@@ -40,14 +40,16 @@ def fetch_dataset(
             start_date = config["data"]["period"]["start_date"]
             end_date = config["data"]["period"]["end_date"]
             date_condition = f"SESSION_DATE BETWEEN '{start_date}' AND '{end_date}'"
-            logger.info(f"学習用データを取得: 期間 {start_date} から {end_date}")
+            logger.info(
+                f"Retrieving training data: period from {start_date} to {end_date}"
+            )
         else:
             if prediction_date is None:
-                raise ValueError("推論時には prediction_date が必要です")
+                raise ValueError("prediction_date is required for inference")
 
             # 推論時は引数の推論日付を条件にする
             date_condition = f"SESSION_DATE = '{prediction_date}'"
-            logger.info(f"推論用データを取得: '{prediction_date}'")
+            logger.info(f"Retrieving inference data for date: '{prediction_date}'")
 
         query_string = f"""
             SELECT {', '.join(select_columns)} 
@@ -57,13 +59,13 @@ def fetch_dataset(
         df = session.sql(query_string).to_pandas()
 
         if len(df) == 0:
-            raise ValueError("指定期間のデータは存在しません。")
+            raise ValueError("No data found for the specified period.")
 
         # 取得成功時のログ
-        logger.info(f"データセット取得完了: {len(df)}行")
+        logger.info(f"Dataset retrieval completed: {len(df)} rows")
         return df
 
     except Exception as e:
         # エラー発生時のログ
-        logger.error(f"データセット取得中にエラーが発生: {str(e)}")
-        raise RuntimeError(f"データセット取得中にエラーが発生: {str(e)}")
+        logger.error(f"Error occurred during dataset retrieval: {str(e)}")
+        raise RuntimeError(f"Error occurred during dataset retrieval: {str(e)}")

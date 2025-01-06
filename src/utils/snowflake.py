@@ -23,18 +23,18 @@ def create_session() -> Optional[Session]:
         SnowparkSessionException: Snowflakeへの接続に失敗した場合
     """
     try:
-        logger.info("Snowflakeセッションの作成を開始")
+        logger.info("Starting Snowflake session creation")
         CONNECTION_PARAMETERS_PATH = "connection_parameters.json"
-        logger.debug(f"設定ファイルを読み込み: {CONNECTION_PARAMETERS_PATH}")
+        logger.debug(f"Loading configuration file: {CONNECTION_PARAMETERS_PATH}")
         with open(CONNECTION_PARAMETERS_PATH) as f:
             connection_parameters = json.load(f)
-        logger.info("Snowflakeへの接続を試行")
+        logger.info("Attempting to connect to Snowflake")
         session = Session.builder.configs(connection_parameters).create()
-        logger.info("Snowflakeセッションの作成に成功")
+        logger.info("Successfully created Snowflake session")
         return session
 
     except SnowparkSessionException as e:
-        error_msg = f"Snowflakeへの接続に失敗しました: {str(e)}"
+        error_msg = f"Failed to connect to Snowflake: {str(e)}"
         logger.error(error_msg)
         raise SnowparkSessionException(error_msg) from e
 
@@ -67,11 +67,11 @@ def upload_dataframe_to_snowflake(
     """
     try:
         logger.info(
-            f"データフレームのアップロードを開始: {database_name}.{schema_name}.{table_name}"
+            f"Starting dataframe upload to: {database_name}.{schema_name}.{table_name}"
         )
-        logger.info(f"アップロードモード: {mode}")
-        logger.info(f"データフレームの行数: {len(df)}")
-        logger.debug(f"データフレームのカラム: {', '.join(df.columns)}")
+        logger.info(f"Upload mode: {mode}")
+        logger.info(f"Number of rows in dataframe: {len(df)}")
+        logger.debug(f"Dataframe columns: {', '.join(df.columns)}")
 
         session.use_database(database_name)
         session.use_schema(schema_name)
@@ -84,7 +84,7 @@ def upload_dataframe_to_snowflake(
             unique_dates = df["SESSION_DATE"].unique()
 
             logger.info(
-                f"既存データの削除: SESSION_DATE IN ({', '.join(map(str, unique_dates))})"
+                f"Deleting existing data: SESSION_DATE IN ({', '.join(map(str, unique_dates))})"
             )
             delete_sql = f"""
                 DELETE FROM {full_table_name}
@@ -93,13 +93,13 @@ def upload_dataframe_to_snowflake(
             session.sql(delete_sql).collect()
 
         snowpark_df: SnowparkDataFrame = session.create_dataframe(df)
-        logger.info(f"テーブルへの書き込みを開始: {full_table_name}")
+        logger.info(f"Starting write to table: {full_table_name}")
         snowpark_df.write.mode(mode).save_as_table(full_table_name)
 
         row_count: int = session.table(full_table_name).count()
-        logger.info(f"アップロード完了。テーブルの総行数: {row_count}")
+        logger.info(f"Upload complete. Total rows in table: {row_count}")
 
     except Exception as e:
-        error_msg = f"データのアップロードに失敗しました: {str(e)}"
+        error_msg = f"Failed to upload data: {str(e)}"
         logger.error(error_msg)
         raise

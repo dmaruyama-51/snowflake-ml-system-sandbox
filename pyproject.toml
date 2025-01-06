@@ -8,19 +8,18 @@ packages = [{include = "src"}]
 
 [tool.poetry.dependencies]
 python = ">=3.11,<3.12"
-pytest = "^8.3.3"
-pytest-cov = "^6.0.0"
 snowflake-snowpark-python = {extras = ["pandas"], version = "^1.25.0"}
-pytest-mock = "^3.14.0"
 ucimlrepo = "^0.0.7"
-types-pyyaml = "^6.0.12.20240917"
 snowflake-ml-python = "^1.7.2"
-ipykernel = "^6.29.5"
-
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.8.0"
 mypy = "^1.13.0"
+pytest = "^8.3.3"
+pytest-cov = "^6.0.0"
+pytest-mock = "^3.14.0"
+types-pyyaml = "^6.0.12.20240917"
+ipykernel = "^6.29.5"
 
 [build-system]
 requires = ["poetry-core"]
