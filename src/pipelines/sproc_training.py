@@ -1,5 +1,6 @@
 import os
 import sys
+import logging
 
 from snowflake.ml.registry import Registry
 from snowflake.snowpark import Session
@@ -7,8 +8,10 @@ from snowflake.snowpark import Session
 from src.data.loader import fetch_dataset
 from src.data.preprocessing import split_data
 from src.models.trainer import train_model
-from src.utils.logger import log_to_snowflake
+from src.utils.logger import setup_logging
 from src.utils.snowflake import create_session
+
+logger = logging.getLogger(__name__)
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 IMPORTS_DIR = os.path.join(BASE_DIR, "src")
@@ -16,19 +19,20 @@ IMPORTS_DIR = os.path.join(BASE_DIR, "src")
 
 def sproc_training(session: Session) -> int:
     try:
+        setup_logging()  # ロギング設定の初期化
+        
         df = fetch_dataset(session, is_training=True)
         if df is None:
             raise ValueError("データセットが取得できませんでした")
-        log_to_snowflake(session, f"データセットのフェッチ完了。行数: {len(df)}")
+        logger.info(f"データセットのフェッチ完了。行数: {len(df)}")
 
         df_train_val, df_test = split_data(df)
-        log_to_snowflake(
-            session,
-            f"データセットの分割完了。学習検証データ: {len(df_train_val)}行, テストデータ: {len(df_test)}行",
+        logger.info(
+            f"データセットの分割完了。学習検証データ: {len(df_train_val)}行, テストデータ: {len(df_test)}行"
         )
 
         model_pipeline, val_scores = train_model(df_train_val)
-        log_to_snowflake(session, "モデルの学習完了")
+        logger.info("モデルの学習完了")
 
         registry = Registry(session=session)
         _ = registry.log_model(
@@ -38,12 +42,12 @@ def sproc_training(session: Session) -> int:
             metrics=val_scores[0],
             sample_input_data=df_train_val.head(1),  # サンプル入力データを追加
         )
-        log_to_snowflake(session, "モデルのログ完了")
+        logger.info("モデルのログ完了")
 
         return 1
 
     except Exception as e:
-        log_to_snowflake(session, f"エラーが発生しました: {str(e)}")
+        logger.error(f"エラーが発生しました: {str(e)}")
         raise e
 
 
