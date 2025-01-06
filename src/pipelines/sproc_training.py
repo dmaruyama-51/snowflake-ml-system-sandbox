@@ -33,7 +33,7 @@ def sproc_training(session: Session) -> int:
 
         # バージョン名に時刻も追加して一意性を確保
         version_name = datetime.now().strftime("%y%m%d_%H%M%S")
-        
+
         registry = Registry(session=session)
         _ = registry.log_model(
             model=model_pipeline,

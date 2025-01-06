@@ -18,11 +18,11 @@ def load_latest_model_version(session: Session) -> ModelVersion:
 
     # モデルの参照を取得
     model_ref = registry.get_model(latest_model_name)
-    
+
     # 全バージョンを取得し、バージョン名（YYMMDD形式）で降順ソートして最新を選択
     versions = model_ref.show_versions().sort_values("created_on", ascending=False)
     latest_version = versions["name"].values[0]
-    
+
     mv = model_ref.version(latest_version)
 
     return mv
