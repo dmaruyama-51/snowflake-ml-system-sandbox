@@ -1,6 +1,7 @@
 import logging
 import os
 import sys
+from datetime import datetime
 
 from snowflake.ml.registry import Registry
 from snowflake.snowpark import Session
@@ -34,11 +35,14 @@ def sproc_training(session: Session) -> int:
         model_pipeline, val_scores = train_model(df_train_val)
         logger.info("モデルの学習完了")
 
+        # バージョン名に時刻も追加して一意性を確保
+        version_name = datetime.now().strftime("%y%m%d_%H%M%S")
+
         registry = Registry(session=session)
         _ = registry.log_model(
             model=model_pipeline,
             model_name="random_forest",
-            version_name="v0_1_0",
+            version_name=version_name,
             metrics=val_scores[0],
             sample_input_data=df_train_val.head(1),  # サンプル入力データを追加
         )

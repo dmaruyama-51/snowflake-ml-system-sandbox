@@ -21,6 +21,13 @@ def mock_registry(mocker):
     # get_model の戻り値を設定
     mock_model_ref = mocker.Mock()
     mock_model_version = mocker.Mock(spec=ModelVersion)
+
+    # show_versions の戻り値を設定
+    mock_versions_df = pd.DataFrame(
+        {"name": ["250315", "250314"], "created_on": ["2025-03-15", "2025-03-14"]}
+    )
+    mock_model_ref.show_versions.return_value = mock_versions_df
+
     mock_model_ref.version.return_value = mock_model_version
     mock_registry.get_model.return_value = mock_model_ref
 
@@ -40,6 +47,13 @@ def test_load_latest_model_version(mocker, mock_registry):
     assert isinstance(model_version, mocker.Mock)
     mock_registry.show_models.assert_called_once()
     mock_registry.get_model.assert_called_once_with("model_1")
+
+    # show_versions が呼ばれたことを確認
+    model_ref = mock_registry.get_model.return_value
+    model_ref.show_versions.assert_called_once()
+
+    # 最新バージョンで version が呼ばれたことを確認
+    model_ref.version.assert_called_once_with("250315")
 
 
 def test_predict(mocker):
