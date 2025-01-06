@@ -31,8 +31,8 @@ def sproc_training(session: Session) -> int:
         model_pipeline, val_scores = train_model(df_train_val)
         log_to_snowflake(session, "モデルの学習完了")
 
-        # 現在の日付からバージョン名を生成
-        version_name = datetime.now().strftime("%y%m%d")
+        # バージョン名に時刻も追加して一意性を確保
+        version_name = datetime.now().strftime("%y%m%d_%H%M%S")
         
         registry = Registry(session=session)
         _ = registry.log_model(
