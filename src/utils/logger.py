@@ -1,6 +1,7 @@
 import logging.config
 from pathlib import Path
 
+
 # ロァイルハンドラーを条件付きで設定
 def get_logging_config():
     """環境に応じたロギング設定を返す"""

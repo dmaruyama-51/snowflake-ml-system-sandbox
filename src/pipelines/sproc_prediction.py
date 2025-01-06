@@ -1,6 +1,6 @@
+import logging
 import os
 import sys
-import logging
 
 from snowflake.snowpark import Session
 
@@ -74,6 +74,9 @@ def sproc_prediction(session: Session, prediction_date: str) -> int:
 if __name__ == "__main__":
     try:
         session = create_session()
+        if session is None:  # セッションがNoneの場合のチェックを追加
+            raise RuntimeError("Snowflakeセッションの作成に失敗しました")
+            
         sproc_config = {
             "name": "PREDICTION",
             "is_permanent": True,

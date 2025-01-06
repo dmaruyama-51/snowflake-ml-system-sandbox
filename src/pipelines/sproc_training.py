@@ -1,6 +1,6 @@
+import logging
 import os
 import sys
-import logging
 
 from snowflake.ml.registry import Registry
 from snowflake.snowpark import Session
@@ -54,6 +54,9 @@ def sproc_training(session: Session) -> int:
 if __name__ == "__main__":
     try:
         session = create_session()
+        if session is None:  # セッションがNoneの場合のチェックを追加
+            raise RuntimeError("Snowflakeセッションの作成に失敗しました")
+            
         sproc_config = {
             "name": "TRAINING",
             "is_permanent": True,

@@ -8,6 +8,6 @@ test:
 	${POETRY_RUN} pytest tests/
 lint: 
 	${POETRY_RUN} mypy ${MYPY_OPTIONS} -p src -p tests
-	${POETRY_RUN} ruff check . --fix
+	${POETRY_RUN} ruff check . --extend-select I --fix
 format: 
 	${POETRY_RUN} ruff format .
