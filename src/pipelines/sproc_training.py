@@ -42,7 +42,7 @@ def sproc_training(session: Session) -> int:
             metrics=val_scores[0],
             sample_input_data=df_train_val.head(1),  # サンプル入力データを追加
         )
-        log_to_snowflake(session, f"モデルのログ完了")
+        log_to_snowflake(session, "モデルのログ完了")
 
         return 1
 
