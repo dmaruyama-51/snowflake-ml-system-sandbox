@@ -30,14 +30,14 @@ def load_config(config_path: Optional[str] = None) -> Dict[str, Any]:
                 sys._xoptions["snowflake_import_directory"], "config.yml"
             )
 
-    logger.info(f"設定ファイルの読み込みを開始: {config_path}")
+    logger.info(f"Loading config file: {config_path}")
 
     try:
         with open(config_path, "r") as f:
             config = yaml.safe_load(f)
-        logger.info("設定ファイルの読み込みが完了しました")
+        logger.info("Config file loaded successfully")
         return config
 
     except Exception as e:  # pragma: no cover
-        logger.error(f"設定ファイルの読み込みに失敗: {str(e)}")
+        logger.error(f"Failed to load config file: {str(e)}")
         raise

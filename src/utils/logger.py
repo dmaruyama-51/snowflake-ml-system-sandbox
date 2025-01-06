@@ -1,8 +1,6 @@
 import logging.config
 from pathlib import Path
 
-from snowflake.snowpark import Session
-
 
 # ロァイルハンドラーを条件付きで設定
 def get_logging_config():
@@ -51,18 +49,3 @@ def get_logging_config():
 def setup_logging():
     """ロギング設定を初期化"""
     logging.config.dictConfig(get_logging_config())
-
-
-def log_to_snowflake(session: Session, message: str) -> None:
-    """Snowflakeにログを記録"""
-    session.sql(f"""
-    INSERT INTO log_trace (
-        timestamp,
-        event_name,
-        message
-    ) VALUES (
-        CURRENT_TIMESTAMP(),
-        'TRAINING_LOG',
-        '{message}'
-    )
-    """).collect()

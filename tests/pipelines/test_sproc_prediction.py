@@ -52,7 +52,8 @@ def test_sproc_prediction_fetch_dataset_returns_none(mocker):
     mock_fetch = mocker.patch("src.pipelines.sproc_prediction.fetch_dataset")
     mock_fetch.return_value = None
 
-    with pytest.raises(SystemExit) as exc_info:
+    with pytest.raises(ValueError, match="Failed to fetch dataset"):
         sproc_prediction(mock_session, "2024-03-20")
-
-    assert exc_info.value.code == 1
+    mock_fetch.assert_called_once_with(
+        mock_session, is_training=False, prediction_date="2024-03-20"
+    )
