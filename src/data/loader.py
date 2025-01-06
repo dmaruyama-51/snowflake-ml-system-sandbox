@@ -40,7 +40,9 @@ def fetch_dataset(
             start_date = config["data"]["period"]["start_date"]
             end_date = config["data"]["period"]["end_date"]
             date_condition = f"SESSION_DATE BETWEEN '{start_date}' AND '{end_date}'"
-            logger.info(f"Retrieving training data: period from {start_date} to {end_date}")
+            logger.info(
+                f"Retrieving training data: period from {start_date} to {end_date}"
+            )
         else:
             if prediction_date is None:
                 raise ValueError("prediction_date is required for inference")

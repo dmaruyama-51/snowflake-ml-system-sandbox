@@ -93,7 +93,7 @@ def test_fetch_dataset_error_handling(mocker):
     with pytest.raises(RuntimeError) as exc_info:
         fetch_dataset(error_session, is_training=True)
 
-    assert "データセット取得中にエラーが発生" in str(exc_info.value)
+    assert "Error occurred during dataset retrieval" in str(exc_info.value)
 
 
 def test_fetch_dataset_inference_mode_without_date(mock_snowflake_session):
@@ -101,7 +101,7 @@ def test_fetch_dataset_inference_mode_without_date(mock_snowflake_session):
     with pytest.raises(RuntimeError) as exc_info:
         fetch_dataset(mock_snowflake_session, is_training=False, prediction_date=None)
 
-    assert "推論時には prediction_date が必要です" in str(exc_info.value)
+    assert "prediction_date is required for inference" in str(exc_info.value)
 
 
 def test_fetch_dataset_empty_result(mocker):
@@ -109,11 +109,11 @@ def test_fetch_dataset_empty_result(mocker):
     # 空のデータフレームを返すモックセッション
     empty_session = mocker.Mock()
     empty_result = mocker.Mock()
-    empty_result.to_pandas.return_value = pd.DataFrame()  # 空のデータフレーム
+    empty_result.to_pandas.return_value = pd.DataFrame()
     empty_session.sql.return_value = empty_result
 
     # エラーが発生することを確認
     with pytest.raises(RuntimeError) as exc_info:
         fetch_dataset(empty_session, is_training=True)
 
-    assert "指定期間のデータは存在しません" in str(exc_info.value)
+    assert "No data found for the specified period" in str(exc_info.value)

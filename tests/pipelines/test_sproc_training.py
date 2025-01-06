@@ -42,7 +42,7 @@ def test_sproc_training_fetch_dataset_returns_none(mocker):
     mock_fetch = mocker.patch("src.pipelines.sproc_training.fetch_dataset")
     mock_fetch.return_value = None
 
-    with pytest.raises(ValueError, match="データセットが取得できませんでした"):
+    with pytest.raises(ValueError, match="Failed to fetch dataset"):
         sproc_training(mock_session)
 
     # fetch_datasetが呼び出されたことを確認
