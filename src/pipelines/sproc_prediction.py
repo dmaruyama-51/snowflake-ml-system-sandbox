@@ -93,6 +93,7 @@ if __name__ == "__main__":
             "execute_as": "caller",
         }
         session.sproc.register(func=sproc_prediction, **sproc_config)  # type: ignore
+        session.sql("ALTER PROCEDURE PREDICTION() SET LOG_LEVEL = 'INFO'").collect()
 
     except Exception as e:
         print(f"エラーが発生しました: {str(e)}")

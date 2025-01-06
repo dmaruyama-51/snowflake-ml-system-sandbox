@@ -72,6 +72,7 @@ if __name__ == "__main__":
             "execute_as": "caller",
         }
         session.sproc.register(func=sproc_training, **sproc_config)  # type: ignore
+        session.sql("ALTER PROCEDURE TRAINING() SET LOG_LEVEL = 'INFO'").collect()
 
     except Exception as e:
         print(f"エラーが発生しました: {str(e)}")
