@@ -32,19 +32,19 @@ def sproc_prediction(session: Session, prediction_date: str) -> int:
     try:
         setup_logging()  # ロギング設定の初期化
 
-        logger.info(f"推論処理を開始, predicion_date={prediction_date}")
+        logger.info(f"Starting prediction process, prediction_date={prediction_date}")
 
         df = fetch_dataset(session, is_training=False, prediction_date=prediction_date)
         if df is None:
-            raise ValueError("データセットが取得できませんでした")
+            raise ValueError("Failed to fetch dataset")
         features = df.drop(columns=["UID"])
-        logger.info(f"データセットのフェッチ完了。行数: {len(df)}")
+        logger.info(f"Dataset fetched successfully. Number of rows: {len(df)}")
 
         mv = load_latest_model_version(session)
-        logger.info("モデルの読み込み完了")
+        logger.info("Model loading completed")
 
         df["SCORE"] = predict(features, mv)
-        logger.info("推論完了")
+        logger.info("Prediction completed")
 
         # 推論結果をスコアテーブルに書き込み
         scores_df = df[["UID", "SCORE"]]
@@ -63,11 +63,11 @@ def sproc_prediction(session: Session, prediction_date: str) -> int:
             table_name="SCORES",
             mode="append",
         )
-        logger.info("推論結果のアップロード完了")
+        logger.info("Prediction results upload completed")
         return 1
 
     except Exception as e:
-        logger.error(f"エラーが発生しました: {str(e)}")
+        logger.error(f"An error occurred: {str(e)}")
         raise e
 
 
@@ -75,7 +75,7 @@ if __name__ == "__main__":
     try:
         session = create_session()
         if session is None:  # セッションがNoneの場合のチェックを追加
-            raise RuntimeError("Snowflakeセッションの作成に失敗しました")
+            raise RuntimeError("Failed to create Snowflake session")
 
         sproc_config = {
             "name": "PREDICTION",
@@ -106,7 +106,7 @@ if __name__ == "__main__":
         session.sql("ALTER PROCEDURE PREDICTION() SET LOG_LEVEL = 'INFO'").collect()
 
     except Exception as e:
-        print(f"エラーが発生しました: {str(e)}")
+        print(f"An error occurred: {str(e)}")
         sys.exit(1)
     finally:
         if session:

@@ -24,16 +24,16 @@ def sproc_training(session: Session) -> int:
 
         df = fetch_dataset(session, is_training=True)
         if df is None:
-            raise ValueError("データセットが取得できませんでした")
-        logger.info(f"データセットのフェッチ完了。行数: {len(df)}")
+            raise ValueError("Failed to fetch dataset")
+        logger.info(f"Dataset fetched successfully. Number of rows: {len(df)}")
 
         df_train_val, df_test = split_data(df)
         logger.info(
-            f"データセットの分割完了。学習検証データ: {len(df_train_val)}行, テストデータ: {len(df_test)}行"
+            f"Dataset split completed. Training/validation data: {len(df_train_val)} rows, Test data: {len(df_test)} rows"
         )
 
         model_pipeline, val_scores = train_model(df_train_val)
-        logger.info("モデルの学習完了")
+        logger.info("Model training completed")
 
         # バージョン名に時刻も追加して一意性を確保
         version_name = datetime.now().strftime("%y%m%d_%H%M%S")
@@ -46,12 +46,12 @@ def sproc_training(session: Session) -> int:
             metrics=val_scores[0],
             sample_input_data=df_train_val.head(1),  # サンプル入力データを追加
         )
-        logger.info("モデルのログ完了")
+        logger.info("Model logging completed")
 
         return 1
 
     except Exception as e:
-        logger.error(f"エラーが発生しました: {str(e)}")
+        logger.error(f"An error occurred: {str(e)}")
         raise e
 
 
@@ -59,7 +59,7 @@ if __name__ == "__main__":
     try:
         session = create_session()
         if session is None:  # セッションがNoneの場合のチェックを追加
-            raise RuntimeError("Snowflakeセッションの作成に失敗しました")
+            raise RuntimeError("Failed to create Snowflake session")
 
         sproc_config = {
             "name": "TRAINING",
@@ -86,7 +86,7 @@ if __name__ == "__main__":
         session.sql("ALTER PROCEDURE TRAINING() SET LOG_LEVEL = 'INFO'").collect()
 
     except Exception as e:
-        print(f"エラーが発生しました: {str(e)}")
+        print(f"An error occurred: {str(e)}")
         sys.exit(1)
     finally:
         if session:
