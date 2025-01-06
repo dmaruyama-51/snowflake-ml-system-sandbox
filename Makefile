@@ -11,3 +11,6 @@ lint:
 	${POETRY_RUN} ruff check . --extend-select I --fix
 format: 
 	${POETRY_RUN} ruff format .
+all: test lint format
+
+.PHONY: test lint format all

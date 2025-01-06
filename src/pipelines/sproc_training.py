@@ -20,7 +20,7 @@ IMPORTS_DIR = os.path.join(BASE_DIR, "src")
 def sproc_training(session: Session) -> int:
     try:
         setup_logging()  # ロギング設定の初期化
-        
+
         df = fetch_dataset(session, is_training=True)
         if df is None:
             raise ValueError("データセットが取得できませんでした")
@@ -56,7 +56,7 @@ if __name__ == "__main__":
         session = create_session()
         if session is None:  # セッションがNoneの場合のチェックを追加
             raise RuntimeError("Snowflakeセッションの作成に失敗しました")
-            
+
         sproc_config = {
             "name": "TRAINING",
             "is_permanent": True,

@@ -31,9 +31,9 @@ def sproc_prediction(session: Session, prediction_date: str) -> int:
     """
     try:
         setup_logging()  # ロギング設定の初期化
-        
+
         logger.info(f"推論処理を開始, predicion_date={prediction_date}")
-        
+
         df = fetch_dataset(session, is_training=False, prediction_date=prediction_date)
         if df is None:
             raise ValueError("データセットが取得できませんでした")
@@ -54,7 +54,7 @@ def sproc_prediction(session: Session, prediction_date: str) -> int:
         scores_df = scores_df[
             ["UID", "SESSION_DATE", "MODEL_NAME", "MODEL_VERSION", "SCORE"]
         ]
-        
+
         upload_dataframe_to_snowflake(
             session=session,
             df=scores_df,
@@ -76,7 +76,7 @@ if __name__ == "__main__":
         session = create_session()
         if session is None:  # セッションがNoneの場合のチェックを追加
             raise RuntimeError("Snowflakeセッションの作成に失敗しました")
-            
+
         sproc_config = {
             "name": "PREDICTION",
             "is_permanent": True,
