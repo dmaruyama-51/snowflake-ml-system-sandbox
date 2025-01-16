@@ -32,18 +32,25 @@ def sproc_training(session: Session) -> int:
             f"Dataset split completed. Training/validation data: {len(df_train_val)} rows, Test data: {len(df_test)} rows"
         )
 
-        model_pipeline, val_scores = train_model(df_train_val)
+        model_pipeline, val_scores = train_model(
+            df = df_train_val,
+            n_splits = 5,
+            random_state = 0,
+            optimize_hyperparams = True,
+            n_trials = 10
+        )
         logger.info("Model training completed")
 
         # バージョン名に時刻も追加して一意性を確保
-        version_name = datetime.now().strftime("%y%m%d_%H%M%S")
+        # 数字始まりはNGなので、v_を先頭につける ref) https://docs.snowflake.com/en/sql-reference/identifiers-syntax
+        version_name = f"v_{datetime.now().strftime('%y%m%d_%H%M%S')}"
 
         registry = Registry(session=session)
         _ = registry.log_model(
             model=model_pipeline,
             model_name="random_forest",
             version_name=version_name,
-            metrics=val_scores[0],
+            metrics=val_scores,
             sample_input_data=df_train_val.head(1),  # サンプル入力データを追加
         )
         logger.info("Model logging completed")
@@ -71,6 +78,7 @@ if __name__ == "__main__":
                 "scikit-learn",
                 "pandas",
                 "numpy",
+                "optuna"
             ],
             "imports": [
                 (os.path.join(IMPORTS_DIR, "data"), "src.data"),
