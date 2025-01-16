@@ -1,7 +1,8 @@
 import logging
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
+import optuna
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import (
@@ -13,7 +14,6 @@ from sklearn.metrics import (
 )
 from sklearn.model_selection import StratifiedKFold
 from sklearn.pipeline import Pipeline
-import optuna
 
 from src.data.preprocessing import create_preprocessor
 from src.utils.config import load_config
@@ -22,18 +22,17 @@ logger = logging.getLogger(__name__)
 config = load_config()
 
 
-def create_model_pipeline(params: Optional[Dict[str, Any]] = None, random_state: int = 0) -> Pipeline:
+def create_model_pipeline(
+    params: Optional[Dict[str, Any]] = None, random_state: int = 0
+) -> Pipeline:
     """Create model pipeline with optional parameters"""
     logger.info("Starting model pipeline creation")
-    
+
     if params is None:
         params = {}
-    
-    rf_params = {
-        "random_state": random_state,
-        **params
-    }
-    
+
+    rf_params = {"random_state": random_state, **params}
+
     pipeline = Pipeline(
         [
             ("preprocessor", create_preprocessor()),
@@ -75,9 +74,11 @@ def calc_evaluation_metrics(
         )
 
 
-def objective(trial: optuna.Trial, X: pd.DataFrame, y: pd.Series, n_splits: int, random_state: int) -> float:
+def objective(
+    trial: optuna.Trial, X: pd.DataFrame, y: pd.Series, n_splits: int, random_state: int
+) -> float:
     """Optunaの目的関数
-    
+
     Args:
         trial: OptunaのTrialオブジェクト
         X: 特徴量
@@ -95,22 +96,23 @@ def objective(trial: optuna.Trial, X: pd.DataFrame, y: pd.Series, n_splits: int,
         "min_samples_split": trial.suggest_int("min_samples_split", 2, 20),
         "min_samples_leaf": trial.suggest_int("min_samples_leaf", 1, 10),
         "max_features": trial.suggest_categorical(
-                "max_features", ["sqrt", "log2", None]
-            ),
+            "max_features", ["sqrt", "log2", None]
+        ),
         "criterion": trial.suggest_categorical("criterion", ["gini", "entropy"]),
     }
-    
+
     cv_scores = []
     skf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=random_state)
     for fold, (train_idx, val_idx) in enumerate(skf.split(X, y), 1):
-
         try:
             X_train, X_val = X.iloc[train_idx], X.iloc[val_idx]
             y_train, y_val = y.iloc[train_idx], y.iloc[val_idx]
-            model_pipeline = create_model_pipeline(params=params, random_state=random_state)
+            model_pipeline = create_model_pipeline(
+                params=params, random_state=random_state
+            )
             model_pipeline.fit(X_train, y_train)
             y_pred_proba = model_pipeline.predict_proba(X_val)[:, 1]
-            
+
             score = average_precision_score(y_val, y_pred_proba)
             cv_scores.append(score)
         except Exception as e:
@@ -123,12 +125,12 @@ def objective(trial: optuna.Trial, X: pd.DataFrame, y: pd.Series, n_splits: int,
 
 
 def train_model(
-    df: pd.DataFrame, 
-    n_splits: Optional[int] = None, 
+    df: pd.DataFrame,
+    n_splits: Optional[int] = None,
     random_state: Optional[int] = None,
     optimize_hyperparams: bool = True,
-    n_trials: int = 10
-) -> Tuple[Pipeline, List[Dict[str, float]]]:
+    n_trials: int = 10,
+) -> Tuple[Pipeline, Dict[str, float]]:
     """
     モデルの学習と交差検証を実行
 
@@ -162,9 +164,9 @@ def train_model(
         study = optuna.create_study(direction="maximize")
         study.optimize(
             lambda trial: objective(trial, X, y, n_splits, random_state),
-            n_trials=n_trials
+            n_trials=n_trials,
         )
-        
+
         best_params = study.best_params
         logger.info(f"Best parameters: {best_params}")
         logger.info(f"Best PR-AUC score: {study.best_value:.3f}")
@@ -175,14 +177,16 @@ def train_model(
     # 全データで最終モデルの学習
     logger.info("Starting final model training")
     try:
-        final_model_pipeline = create_model_pipeline(params=best_params, random_state=random_state)
+        final_model_pipeline = create_model_pipeline(
+            params=best_params, random_state=random_state
+        )
         final_model_pipeline.fit(X, y)
         logger.info("Final model training completed")
 
         evaluation_metrics = calc_evaluation_metrics(
-            y, 
-            final_model_pipeline.predict(X), 
-            final_model_pipeline.predict_proba(X)[:, 1]
+            y,
+            final_model_pipeline.predict(X),
+            final_model_pipeline.predict_proba(X)[:, 1],
         )
         logger.info("Final model evaluation completed")
     except Exception as e:

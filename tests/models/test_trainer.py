@@ -127,17 +127,21 @@ def test_train_model_with_hyperparameter_optimization(sample_data):
         n_splits=2,  # テスト用に少ない分割数
         random_state=42,
         optimize_hyperparams=True,
-        n_trials=3  # テスト用に少ない試行回数
+        n_trials=3,  # テスト用に少ない試行回数
     )
 
     # モデルの検証
     assert isinstance(model, Pipeline)
-    
+
     # RandomForestClassifierのパラメータが最適化されているか確認
-    rf_params = model.named_steps['classifier'].get_params()
+    rf_params = model.named_steps["classifier"].get_params()
     optimizable_params = {
-        'n_estimators', 'max_depth', 'min_samples_split',
-        'min_samples_leaf', 'max_features', 'criterion'
+        "n_estimators",
+        "max_depth",
+        "min_samples_split",
+        "min_samples_leaf",
+        "max_features",
+        "criterion",
     }
     # 少なくとも1つのパラメータが最適化されていることを確認
     assert any(param in rf_params for param in optimizable_params)
@@ -152,41 +156,39 @@ def test_train_model_without_hyperparameter_optimization(sample_data):
     """ハイパーパラメータ最適化なしのモデル学習のテスト"""
     # 実行
     model, metrics = train_model(
-        sample_data,
-        n_splits=2,
-        random_state=42,
-        optimize_hyperparams=False
+        sample_data, n_splits=2, random_state=42, optimize_hyperparams=False
     )
 
     # モデルの検証
     assert isinstance(model, Pipeline)
-    
+
     # デフォルトパラメータが使用されているか確認
-    rf_params = model.named_steps['classifier'].get_params()
-    assert rf_params['random_state'] == 42
+    rf_params = model.named_steps["classifier"].get_params()
+    assert rf_params["random_state"] == 42
     # デフォルトパラメータ以外が変更されていないことを確認
     default_rf = RandomForestClassifier(random_state=42)
     for param, value in rf_params.items():
-        if param != 'random_state':
+        if param != "random_state":
             assert value == default_rf.get_params()[param]
 
 
 def test_objective_function(sample_data):
     """Optuna目的関数のテスト"""
-    from src.models.trainer import objective
     import optuna
-    
+
+    from src.models.trainer import objective
+
     # テストデータの準備
     X = sample_data.drop("REVENUE", axis=1)
     y = sample_data["REVENUE"]
-    
+
     # Studyオブジェクトの作成
     study = optuna.create_study(direction="maximize")
     trial = study.ask()
-    
+
     # 目的関数の実行
     score = objective(trial, X, y, n_splits=2, random_state=42)
-    
+
     # スコアの検証
     assert isinstance(score, float)
     assert 0 <= score <= 1

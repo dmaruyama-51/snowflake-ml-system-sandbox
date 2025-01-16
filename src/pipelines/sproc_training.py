@@ -33,11 +33,11 @@ def sproc_training(session: Session) -> int:
         )
 
         model_pipeline, val_scores = train_model(
-            df = df_train_val,
-            n_splits = 5,
-            random_state = 0,
-            optimize_hyperparams = True,
-            n_trials = 10
+            df=df_train_val,
+            n_splits=5,
+            random_state=0,
+            optimize_hyperparams=True,
+            n_trials=10,
         )
         logger.info("Model training completed")
 
@@ -78,7 +78,7 @@ if __name__ == "__main__":
                 "scikit-learn",
                 "pandas",
                 "numpy",
-                "optuna"
+                "optuna",
             ],
             "imports": [
                 (os.path.join(IMPORTS_DIR, "data"), "src.data"),
