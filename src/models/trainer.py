@@ -127,7 +127,7 @@ def train_model(
     n_splits: Optional[int] = None, 
     random_state: Optional[int] = None,
     optimize_hyperparams: bool = True,
-    n_trials: int = 100
+    n_trials: int = 10
 ) -> Tuple[Pipeline, List[Dict[str, float]]]:
     """
     モデルの学習と交差検証を実行
