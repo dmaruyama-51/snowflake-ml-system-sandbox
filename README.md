@@ -2,57 +2,62 @@
 
 ## Overview
 
-Snowflakeを活用した機械学習システムの実装例 & 新機能調査のsandbox
+This repository serves as a personal sandbox for exploring and staying up-to-date with Snowflake's latest machine learning features. The primary focus is on implementing practical use cases to deepen understanding and evaluate the integration of Snowflake’s capabilities with Python-based workflows. Specifically, this sandbox demonstrates predicting and scoring customer purchasing intent in an online shopping context, storing these scores in Snowflake for downstream marketing applications.
 
-### Usecase
+## Usecase
 
-- オンラインショッピングにおける顧客の購買意図を予測・スコア算出し、スコアを元にマーケティング施策を展開する
-- このシステムでは Daily のバッチ処理で、ユーザーごとに購入意欲スコアをSnowflakeのScoresテーブルに保存する処理までを範囲とする。（本来はその先にMA等への連携などを想定）
+The system predicts customer purchasing intent based on session data from an online shopping platform. The daily batch processing pipeline:
+- Computes purchasing intent scores for each user.
+- Stores the scores in the Scores table in Snowflake.
 
+This setup simulates a marketing pipeline, enabling targeted campaigns based on intent scores.
 
-### Dataset Information
-UCI Machine Learning Repositoryの[Online Shoppers Purchasing Intention Dataset](https://archive.ics.uci.edu/dataset/468/online+shoppers+purchasing+intention+dataset)を加工して使用。元のデータセットに SessionDate と UID を追加している。
+### Dataset
+The dataset used is a modified version of the [Online Shoppers Purchasing Intention Dataset](https://archive.ics.uci.edu/dataset/468/online+shoppers+purchasing+intention+dataset) from the UCI Machine Learning Repository. Modifications include:
+- `SessionDate`: Derived from the Month column and formatted as 2024-xx-01.
+- `UID`: Generated using UUIDs.
 
-| カラム名                   | 説明                                                                                   |
-|-----------------------------|----------------------------------------------------------------------------------------|
-| Administrative              | 訪問者が閲覧した管理関連ページの数                                                      |
-| Administrative_Duration     | 管理関連ページに費やした総時間（秒）                                                    |
-| Informational               | 訪問者が閲覧した情報提供ページの数                                                      |
-| Informational_Duration      | 情報提供ページに費やした総時間（秒）                                                    |
-| ProductRelated              | 訪問者が閲覧した商品関連ページの数                                                      |
-| ProductRelated_Duration     | 商品関連ページに費やした総時間（秒）                                                    |
-| BounceRates                 | 訪問者が最初のページから他のページに移動せずに離脱した割合                              |
-| ExitRates                   | 特定のページがセッション中の最後のページとなった割合                                    |
-| PageValues                  | eコマース取引を完了する前に訪問されたページの平均価値                                   |
-| SpecialDay                  | 訪問日が特定の特別な日にどれだけ近いかを示す指標（例：母の日、バレンタインデー）         |
-| Month                       | 訪問月（例：Jan, Feb, Mar）                                                             |
-| OperatingSystems            | 訪問者が使用したオペレーティングシステムの種類                                          |
-| Browser                     | 訪問者が使用したブラウザの種類                                                          |
-| Region                      | 訪問者の地理的な地域                                                                    |
-| TrafficType                 | 訪問者がウェブサイトにアクセスしたトラフィックの種類                                     |
-| VisitorType                 | 訪問者が新規かリピーターかを示す（'New_Visitor', 'Returning_Visitor', 'Other'）         |
-| Weekend                     | 訪問が週末に行われたかどうかを示す（True または False）                                 |
-| Revenue                     | セッションが購入に至ったかどうかを示す（True または False）                             |
-| SessionDate                     | 訪問日（Monthを元に 2024-xx-01 の日付として生成）                |
-| UID                     | 訪問者ID（UUIDで生成）                |
+By combining SessionDate and UID, each record in the dataset is uniquely identifiable. 
 
-※ UID と SessionDate でユニーク
+## Technical Stack
+
+- Programming Language: Python 3.11
+- Dependency Management: Poetry
+- Continuous Integration: GitHub Actions
+- Snowflake Features:
+    - Snowpark for Python: A development framework to execute Python directly within Snowflake’s processing engine. 
+    - Python Stored Procedures: Wrapping and deploying processing logic.
+    - Model Registry: Managing machine learning models.
+    - Task Scheduling: Automating daily score computations (Planned).
+    - Feature Store: Managing reusable features for ML models (Planned).
+    - ML Observability: Tracking model performance and system health (Planned).
+
+## Development Environment
+
+### Code Quality Management
+- Ruff: Linting and formatting.
+- Mypy: Static type checking.
+
+### Development Commands
+
+A Makefile is provided for streamlined development tasks:
+- `make lint`: Run linter to check code quality.
+- `make format`: Run formatter to ensure consistent code style.
+- `make test`: Run tests using pytest.
 
 
 
 ## Setup
 
-### 環境設定
-以下のコマンドで必要なパッケージをインストール
+1. Set Up Python Environment:
 ```bash
 poetry install
 ```
 
-### Snowflakeの接続情報
-
-Snowflakeの接続情報は`connection_parameters.json`に記載してルートディレクトリに配置
-```json
-{
+2. Configure Snowflake:
+- Create a file named connection_parameters.json in the root directory with the following structure:
+  ```json
+  {
     "account": "",
     "user": "",
     "password": "",
@@ -60,12 +65,12 @@ Snowflakeの接続情報は`connection_parameters.json`に記載してルート�
     "warehouse": "",
     "database": "",
     "schema": ""
-}
-```
+  }
+  ```
+  - Fill in the necessary connection details specific to your Snowflake account.
 
-### データセットの用意
-以下のコマンドでデータを生成してSnowflakeへアップロード
-
-```bash
-poetry run python src/adhoc/prepare_dataset.py
-```
+3. Prepare and Upload Dataset
+- Run the following command to preprocess the dataset and upload it to Snowflake:
+  ```bash
+  poetry run python src/adhoc/prepare_dataset.py
+  ```

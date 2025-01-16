@@ -17,15 +17,15 @@ def split_data(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
     test_size = 0.2
     random_state = 0
 
-    logger.info(f"データの分割を開始 (test_size: {test_size})")
-    logger.debug(f"入力データのサイズ: {df.shape}")
+    logger.info(f"Starting data split (test_size: {test_size})")
+    logger.debug(f"Input data shape: {df.shape}")
 
     train_val, test = train_test_split(
         df, test_size=test_size, random_state=random_state
     )
 
     logger.info(
-        f"データ分割完了: 学習検証データ {train_val.shape}, テストデータ {test.shape}"
+        f"Data split completed: train/val data {train_val.shape}, test data {test.shape}"
     )
     return train_val, test
 
@@ -35,7 +35,7 @@ def create_preprocessor() -> ColumnTransformer:
     numeric_features = config["data"]["features"]["numeric"]
     categorical_features = config["data"]["features"]["categorical"]
 
-    logger.info("前処理パイプラインの作成を開始")
+    logger.info("Starting preprocessing pipeline creation")
 
     preprocessor = ColumnTransformer(
         [
@@ -48,5 +48,5 @@ def create_preprocessor() -> ColumnTransformer:
         ]
     )
 
-    logger.info("前処理パイプラインの作成完了")
+    logger.info("Preprocessing pipeline creation completed")
     return preprocessor
