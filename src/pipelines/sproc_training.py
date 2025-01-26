@@ -8,7 +8,7 @@ from snowflake.snowpark import Session
 
 from src.data.loader import fetch_dataset
 from src.data.preprocessing import split_data
-from src.models.trainer import train_model
+from src.models.trainer import train_model, calc_evaluation_metrics
 from src.utils.logger import setup_logging
 from src.utils.snowflake import create_session
 
@@ -27,12 +27,12 @@ def sproc_training(session: Session) -> int:
             raise ValueError("Failed to fetch dataset")
         logger.info(f"Dataset fetched successfully. Number of rows: {len(df)}")
 
-        df_train_val, df_test = split_data(df)
+        df_train_val, df_test = split_data(df.drop(columns=["UID"]))
         logger.info(
             f"Dataset split completed. Training/validation data: {len(df_train_val)} rows, Test data: {len(df_test)} rows"
         )
 
-        model_pipeline, val_scores = train_model(
+        model_pipeline, _ = train_model(
             df=df_train_val,
             n_splits=5,
             random_state=0,
@@ -40,6 +40,14 @@ def sproc_training(session: Session) -> int:
             n_trials=10,
         )
         logger.info("Model training completed")
+
+        # テストデータで推論・評価
+        test_scores = calc_evaluation_metrics(
+            y_true=df_test["REVENUE"],
+            y_pred=model_pipeline.predict(df_test.drop(columns=["REVENUE"])),
+            y_pred_proba=model_pipeline.predict_proba(df_test.drop(columns=["REVENUE"]))[:, 1],
+        )
+        logger.info("Model evaluation completed")
 
         # バージョン名に時刻も追加して一意性を確保
         # 数字始まりはNGなので、v_を先頭につける ref) https://docs.snowflake.com/en/sql-reference/identifiers-syntax
@@ -50,8 +58,8 @@ def sproc_training(session: Session) -> int:
             model=model_pipeline,
             model_name="random_forest",
             version_name=version_name,
-            metrics=val_scores,
-            sample_input_data=df_train_val.head(1),  # サンプル入力データを追加
+            metrics=test_scores,
+            sample_input_data=df_train_val.drop(columns=["REVENUE"]).head(1),  # サンプル入力データを追加
         )
         logger.info("Model logging completed")
 
