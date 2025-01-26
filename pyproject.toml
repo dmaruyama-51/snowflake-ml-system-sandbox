@@ -11,6 +11,7 @@ python = ">=3.11,<3.12"
 snowflake-snowpark-python = {extras = ["pandas"], version = "^1.25.0"}
 ucimlrepo = "^0.0.7"
 snowflake-ml-python = "^1.7.2"
+optuna = "^4.1.0"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.8.0"
