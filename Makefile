@@ -21,13 +21,21 @@ format:
 all: test lint format
 
 # ==============================
-# deploy sproc
+# deploy
 # ==============================
 
 deploy-sproc-prediction:
-	${POETRY_RUN} python tests/pipelines/test_sproc_prediction.py
+	${POETRY_RUN} python src/pipelines/sproc_prediction.py
 
 deploy-sproc-training:
-	${POETRY_RUN} python tests/pipelines/test_sproc_training.py
+	${POETRY_RUN} python src/pipelines/sproc_training.py
 
-deploy-sproc: deploy-prediction-sproc deploy-training-sproc 
+deploy-sproc: deploy-sproc-prediction deploy-sproc-training
+
+deploy-task-prediction:
+	${POETRY_RUN} python src/tasks/task_prediction.py
+
+deploy-task-training:
+	${POETRY_RUN} python src/tasks/task_training.py
+
+deploy-task: deploy-task-prediction deploy-task-training

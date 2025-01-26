@@ -1,14 +1,14 @@
 import logging
 import sys
+from datetime import datetime, timedelta, timezone
 
 from snowflake.snowpark import Session
 
 from src.utils.logger import setup_logging
 from src.utils.snowflake import create_session
 
-from datetime import datetime, timedelta, timezone
-
 logger = logging.getLogger(__name__)
+
 
 def create_prediction_task(session: Session) -> None:
     """
