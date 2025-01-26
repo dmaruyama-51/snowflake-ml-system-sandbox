@@ -15,7 +15,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 IMPORTS_DIR = os.path.join(BASE_DIR, "src")
 
 
-def sproc_prediction(session: Session, prediction_date: str) -> int:
+def sproc_prediction(session: Session, prediction_date: str = "2024-10-01") -> int:
     """
     推論Sprocの処理内容
 
@@ -103,7 +103,9 @@ if __name__ == "__main__":
             "execute_as": "caller",
         }
         session.sproc.register(func=sproc_prediction, **sproc_config)  # type: ignore
-        session.sql("ALTER PROCEDURE PREDICTION() SET LOG_LEVEL = 'INFO'").collect()
+        session.sql(
+            "ALTER PROCEDURE PREDICTION(VARCHAR) SET LOG_LEVEL = 'INFO'"
+        ).collect()
 
     except Exception as e:
         print(f"An error occurred: {str(e)}")

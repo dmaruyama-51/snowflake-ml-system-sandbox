@@ -210,3 +210,5 @@ pyrightconfig.json
 
 connection_parameters.json
 sandbox.ipynb
+
+logs/
