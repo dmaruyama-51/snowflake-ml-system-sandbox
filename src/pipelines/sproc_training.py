@@ -8,7 +8,8 @@ from snowflake.snowpark import Session
 
 from src.data.loader import fetch_dataset
 from src.data.preprocessing import split_data
-from src.models.trainer import train_model, calc_evaluation_metrics
+from src.models.trainer import calc_evaluation_metrics, train_model
+from src.utils.config import load_config
 from src.utils.logger import setup_logging
 from src.utils.snowflake import create_session
 
@@ -21,6 +22,9 @@ IMPORTS_DIR = os.path.join(BASE_DIR, "src")
 def sproc_training(session: Session) -> int:
     try:
         setup_logging()  # ロギング設定の初期化
+
+        config = load_config()
+        target_column = config["data"]["target"]
 
         df = fetch_dataset(session, is_training=True)
         if df is None:
@@ -43,9 +47,11 @@ def sproc_training(session: Session) -> int:
 
         # テストデータで推論・評価
         test_scores = calc_evaluation_metrics(
-            y_true=df_test["REVENUE"],
-            y_pred=model_pipeline.predict(df_test.drop(columns=["REVENUE"])),
-            y_pred_proba=model_pipeline.predict_proba(df_test.drop(columns=["REVENUE"]))[:, 1],
+            y_true=df_test[target_column],
+            y_pred=model_pipeline.predict(df_test.drop(columns=target_column)),
+            y_pred_proba=model_pipeline.predict_proba(
+                df_test.drop(columns=target_column)
+            )[:, 1],
         )
         logger.info("Model evaluation completed")
 
@@ -59,7 +65,9 @@ def sproc_training(session: Session) -> int:
             model_name="random_forest",
             version_name=version_name,
             metrics=test_scores,
-            sample_input_data=df_train_val.drop(columns=["REVENUE"]).head(1),  # サンプル入力データを追加
+            sample_input_data=df_train_val.drop(columns=["REVENUE"]).head(
+                1
+            ),  # サンプル入力データを追加
         )
         logger.info("Model logging completed")
 
