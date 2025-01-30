@@ -3,6 +3,7 @@ import logging
 from snowflake.snowpark.session import Session
 
 from src.utils.snowflake import upload_dataframe_to_snowflake
+from src.utils.config import load_config
 
 logger = logging.getLogger(__name__)
 
@@ -10,10 +11,10 @@ logger = logging.getLogger(__name__)
 def create_ml_dataset(
     session: Session,
     target_date: str,
-    database_name: str = "practice",
-    schema_name: str = "ml",
-    table_name: str = "dataset",
-    source_table_name: str = "online_shoppers_intention",
+    database_name: str | None = None,
+    schema_name: str | None = None,
+    table_name: str | None = None,
+    source_table_name: str | None = None,
 ) -> None:
     """
     prepare_online_shoppers_data関数で作成されたデータテーブルをsourceとして、
@@ -27,8 +28,13 @@ def create_ml_dataset(
         table_name (str): テーブル名
         source_table_name (str): ソーステーブル名
     """
-
     try:
+        config = load_config()
+        database_name = database_name or session.get_current_database() or config["data"]["snowflake"]["database_dev"]
+        schema_name = schema_name or config["data"]["snowflake"]["schema"]
+        table_name = table_name or config["data"]["snowflake"]["dataset_table"]
+        source_table_name = source_table_name or config["data"]["snowflake"]["source_table"]
+
         logger.info(f"Starting dataset generation. Target date: {target_date}")
         gen_query = f"""
         create or replace table {database_name}.{schema_name}.{table_name} as

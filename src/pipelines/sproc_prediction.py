@@ -8,6 +8,7 @@ from src.data.loader import fetch_dataset
 from src.models.predictor import load_latest_model_version, predict
 from src.utils.logger import setup_logging
 from src.utils.snowflake import create_session, upload_dataframe_to_snowflake
+from src.utils.config import load_config
 
 logger = logging.getLogger(__name__)
 
@@ -55,11 +56,12 @@ def sproc_prediction(session: Session, prediction_date: str = "2024-10-01") -> i
             ["UID", "SESSION_DATE", "MODEL_NAME", "MODEL_VERSION", "SCORE"]
         ]
 
+        config = load_config()
         upload_dataframe_to_snowflake(
             session=session,
             df=scores_df,
-            database_name="PRACTICE",
-            schema_name="ML",
+            database_name=session.get_current_database() or config["data"]["snowflake"]["database_dev"],
+            schema_name=config["data"]["snowflake"]["schema"],
             table_name="SCORES",
             mode="append",
         )

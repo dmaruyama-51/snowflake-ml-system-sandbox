@@ -1,10 +1,10 @@
 data:
   snowflake:
-    database_prod: "practice"
-    database_dev: "practice_dev"
-    schema: "ml"
+    database_dev: "mlsystem_dev"
+    database_prod: "mlsystem_prod"
+    schema: "online_shoppers_intention"
     dataset_table: "dataset"
-    source_table: "online_shoppers_intention"
+    source_table: "source"
 
   # 目的変数
   target:
