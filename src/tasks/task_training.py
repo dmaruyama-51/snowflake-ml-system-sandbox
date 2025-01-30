@@ -27,7 +27,7 @@ def create_training_task(session: Session) -> None:
         create_task_sql = """
         CREATE OR REPLACE TASK task_training
             WAREHOUSE = COMPUTE_WH
-            SCHEDULE = 'USING CRON 0 10 * * 0 Asia/Tokyo'  -- 毎週日曜日の午前10時に実行
+            SCHEDULE = 'USING CRON 0 10 1 * * Asia/Tokyo'  -- 毎月1日の午前10時に実行
         AS
             CALL practice.ml.training();
         """
