@@ -84,10 +84,11 @@ if __name__ == "__main__":
         if session is None:  # セッションがNoneの場合のチェックを追加
             raise RuntimeError("Failed to create Snowflake session")
 
+        stage_location = f"@{session.get_current_database}.{session.get_current_schema}.sproc"
         sproc_config = {
             "name": "TRAINING",
             "is_permanent": True,
-            "stage_location": "@practice.ml.sproc",
+            "stage_location": stage_location,
             "packages": [
                 "snowflake-snowpark-python",
                 "snowflake-ml-python",
