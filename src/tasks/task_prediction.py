@@ -39,7 +39,7 @@ def create_prediction_task(session: Session) -> None:
         logger.info("Task created successfully")
 
         # タスクの有効化
-        session.sql("ALTER TASK practice.ml.task_prediction RESUME").collect()
+        session.sql("ALTER TASK task_prediction RESUME").collect()
         logger.info("Task resumed successfully")
 
     except Exception as e:

@@ -6,11 +6,9 @@ data:
     dataset_table: "dataset"
     source_table: "source"
 
-  # 目的変数
   target:
     - "REVENUE"
   
-  # 説明変数
   features:
     numeric:
       - "ADMINISTRATIVE"
@@ -31,11 +29,9 @@ data:
       - "VISITORTYPE"
       - "WEEKEND"
   
-  # 実行日から何ヶ月前までをTraining期間とするか
   period:
     months: 3
 
-  # テストデータの分割
   split:
     test_size: 0.2
     random_state: 0
@@ -46,7 +42,6 @@ model:
   random_forest:
     random_state: 0
 
-    # optuna での探索範囲
     n_estimators_min: 10
     n_estimators_max: 500
     max_depth_min: 2
