@@ -6,14 +6,15 @@ from src.utils.snowflake import upload_dataframe_to_snowflake
 
 logger = logging.getLogger(__name__)
 
+
 def create_ml_dataset(
-    session: Session, 
+    session: Session,
     target_date: str,
     database_name: str = "practice",
     schema_name: str = "ml",
     table_name: str = "dataset",
     source_table_name: str = "online_shoppers_intention",
-    ) -> None:
+) -> None:
     """
     prepare_online_shoppers_data関数で作成されたデータテーブルをsourceとして、
     指定された日付までのデータを取得しSnowflakeにロード
@@ -55,20 +56,23 @@ def create_ml_dataset(
         where session_date <= '{target_date}'
         """
         session.sql(gen_query).collect()
-        logger.info(f"Dataset generation completed: {database_name}.{schema_name}.{table_name}")
+        logger.info(
+            f"Dataset generation completed: {database_name}.{schema_name}.{table_name}"
+        )
 
     except Exception as e:
         logger.error(f"Error occurred during dataset generation: {str(e)}")
         raise
 
+
 def update_ml_dataset(
-    session: Session, 
+    session: Session,
     target_date: str,
     database_name: str = "practice",
     schema_name: str = "ml",
     table_name: str = "dataset",
     source_table_name: str = "online_shoppers_intention",
-    ) -> None:
+) -> None:
     """
     prepare_online_shoppers_data関数で作成されたデータテーブルをsourceとして、
     指定された日付までのデータを取得しSnowflakeにロード
@@ -85,7 +89,7 @@ def update_ml_dataset(
     try:
         logger.info(f"Starting dataset update. Target date: {target_date}")
         logger.info(f"Source table: {database_name}.{schema_name}.{source_table_name}")
-        
+
         dataset_query = f"""
             select
                 UID,
@@ -117,7 +121,9 @@ def update_ml_dataset(
         logger.info(f"Retrieved {len(append_df)} records")
 
         if len(append_df) > 0:
-            logger.info(f"Appending data to table {database_name}.{schema_name}.{table_name}")
+            logger.info(
+                f"Appending data to table {database_name}.{schema_name}.{table_name}"
+            )
             upload_dataframe_to_snowflake(
                 session=session,
                 df=append_df,

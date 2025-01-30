@@ -12,7 +12,6 @@ if __name__ == "__main__":
     try:
         setup_logging()
 
-        
         logger.info("Creating Snowflake session")
         session = create_session()
         if session is None:

@@ -94,7 +94,9 @@ def prepare_online_shoppers_data(
         df["UID"] = [str(uuid.uuid4()) for _ in range(len(df))]
         logger.info("Date and user ID generation completed")
 
-        logger.info(f"Starting data upload to Snowflake: {database_name}.{schema_name}.{table_name}")
+        logger.info(
+            f"Starting data upload to Snowflake: {database_name}.{schema_name}.{table_name}"
+        )
         upload_dataframe_to_snowflake(
             session=session,
             df=df,

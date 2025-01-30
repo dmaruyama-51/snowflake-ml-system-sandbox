@@ -30,13 +30,13 @@ def sproc_dataset(session: Session, target_date: str) -> int:
     """
     try:
         setup_logging()
-        
+
         # データベース名とスキーマ名を取得し、Noneの場合はデフォルト値を使用
         database_name = session.get_current_database() or "practice"
         schema_name = session.get_current_schema() or "ml"
-        
+
         update_ml_dataset(
-            session=session, 
+            session=session,
             target_date=target_date,
             database_name=database_name,
             schema_name=schema_name,
@@ -60,9 +60,7 @@ if __name__ == "__main__":
             "name": "DATASET",
             "is_permanent": True,
             "stage_location": "@practice.ml.sproc",
-            "packages": [
-                "snowflake-snowpark-python"
-            ],
+            "packages": ["snowflake-snowpark-python"],
             "imports": [
                 (os.path.join(IMPORTS_DIR, "data"), "src.data"),
                 (os.path.join(IMPORTS_DIR, "utils/logger.py"), "src.utils.logger"),
@@ -75,9 +73,7 @@ if __name__ == "__main__":
             "execute_as": "caller",
         }
         session.sproc.register(func=sproc_dataset, **sproc_config)  # type: ignore
-        session.sql(
-            "ALTER PROCEDURE DATASET(VARCHAR) SET LOG_LEVEL = 'INFO'"
-        ).collect()
+        session.sql("ALTER PROCEDURE DATASET(VARCHAR) SET LOG_LEVEL = 'INFO'").collect()
 
     except Exception as e:
         print(f"An error occurred: {str(e)}")
