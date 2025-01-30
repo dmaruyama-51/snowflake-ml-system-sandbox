@@ -24,13 +24,19 @@ all: test lint format
 # deploy
 # ==============================
 
+deploy-sproc-dataset:
+	${POETRY_RUN} python src/pipelines/sproc_dataset.py
+
 deploy-sproc-prediction:
 	${POETRY_RUN} python src/pipelines/sproc_prediction.py
 
 deploy-sproc-training:
 	${POETRY_RUN} python src/pipelines/sproc_training.py
 
-deploy-sproc: deploy-sproc-prediction deploy-sproc-training
+deploy-sproc: deploy-sproc-dataset deploy-sproc-prediction deploy-sproc-training
+
+deploy-task-dataset:
+	${POETRY_RUN} python src/tasks/task_dataset.py
 
 deploy-task-prediction:
 	${POETRY_RUN} python src/tasks/task_prediction.py
@@ -38,4 +44,4 @@ deploy-task-prediction:
 deploy-task-training:
 	${POETRY_RUN} python src/tasks/task_training.py
 
-deploy-task: deploy-task-prediction deploy-task-training
+deploy-task: deploy-task-dataset deploy-task-prediction deploy-task-training
