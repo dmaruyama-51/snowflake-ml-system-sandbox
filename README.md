@@ -28,9 +28,10 @@ By combining SessionDate and UID, each record in the dataset is uniquely identif
     - Snowpark for Python: A development framework to execute Python directly within Snowflake’s processing engine. 
     - Python Stored Procedures: Wrapping and deploying processing logic.
     - Model Registry: Managing machine learning models.
-    - Task Scheduling: Automating daily score computations (Planned).
+    - Task Scheduling: Automating daily score computations.
     - Feature Store: Managing reusable features for ML models (Planned).
-    - ML Observability: Tracking model performance and system health (Planned).
+    - Model Observability: Tracking model performance health (Planned).
+    - Model Explainability: Support for calculating shaplay values (Planned).
 
 ## Development Environment
 
