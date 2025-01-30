@@ -31,8 +31,9 @@ By combining SessionDate and UID, each record in the dataset is uniquely identif
     - Python Stored Procedures: Wrapping and deploying processing logic.
     - Model Registry: Managing machine learning models.
     - Task Scheduling: Automating daily score computations.
-    - Model Observability: Tracking model performance health (Planned).
+    - Streamlit in Snowflake: Visualizing model explainability (Planned).
     - Model Explainability: Support for calculating shaplay values (Planned).
+    - Model Observability: Tracking model performance health (Planned).
 
 ## Development Environment
 
