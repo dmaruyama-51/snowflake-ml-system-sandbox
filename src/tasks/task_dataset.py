@@ -1,5 +1,6 @@
 import logging
 import sys
+from datetime import datetime, timedelta, timezone
 
 from snowflake.snowpark import Session
 
@@ -9,9 +10,9 @@ from src.utils.snowflake import create_session
 logger = logging.getLogger(__name__)
 
 
-def create_training_task(session: Session) -> None:
+def create_prediction_task(session: Session) -> None:
     """
-    トレーニング用のストアドプロシージャを実行するタスクを作成する
+    データセットのストアドプロシージャを実行するタスクを作成
 
     Args:
         session (Session): Snowflakeセッション
@@ -21,25 +22,28 @@ def create_training_task(session: Session) -> None:
     """
     try:
         setup_logging()
-        logger.info("Starting training task creation")
+        logger.info("Starting dataset task creation")
+
+        jst = timezone(timedelta(hours=9))
+        yesterday = (datetime.now(jst) - timedelta(days=1)).strftime("%Y-%m-%d")
 
         # タスクの作成
-        create_task_sql = """
-        CREATE OR REPLACE TASK task_training
+        create_task_sql = f"""
+        CREATE OR REPLACE TASK task_dataset
             WAREHOUSE = COMPUTE_WH
-            SCHEDULE = 'USING CRON 0 10 1 * * Asia/Tokyo'  -- 毎月1日の午前10時に実行
+            SCHEDULE = 'USING CRON 0 5 * * * Asia/Tokyo'
         AS
-            CALL practice.ml.training();
+            CALL dataset('{yesterday}');
         """
         session.sql(create_task_sql).collect()
         logger.info("Task created successfully")
 
         # タスクの有効化
-        session.sql("ALTER TASK task_training RESUME").collect()
+        session.sql("ALTER TASK task_dataset RESUME").collect()
         logger.info("Task resumed successfully")
 
     except Exception as e:
-        error_msg = f"Failed to create training task: {str(e)}"
+        error_msg = f"Failed to create prediction task: {str(e)}"
         logger.error(error_msg)
         raise
 
@@ -50,7 +54,7 @@ if __name__ == "__main__":
         if session is None:
             raise RuntimeError("Failed to create Snowflake session")
 
-        create_training_task(session)
+        create_prediction_task(session)
 
     except Exception as e:
         print(f"An error occurred: {str(e)}")

@@ -4,6 +4,8 @@
 
 This repository serves as a personal sandbox for exploring and staying up-to-date with Snowflake's latest machine learning features. The primary focus is on implementing practical use cases to deepen understanding and evaluate the integration of Snowflake’s capabilities with Python-based workflows. Specifically, this sandbox demonstrates predicting and scoring customer purchasing intent in an online shopping context, storing these scores in Snowflake for downstream marketing applications.
 
+![system_overview](./images/overview.png)
+
 ## Usecase
 
 The system predicts customer purchasing intent based on session data from an online shopping platform. The daily batch processing pipeline:
@@ -29,15 +31,16 @@ By combining SessionDate and UID, each record in the dataset is uniquely identif
     - Python Stored Procedures: Wrapping and deploying processing logic.
     - Model Registry: Managing machine learning models.
     - Task Scheduling: Automating daily score computations.
-    - Feature Store: Managing reusable features for ML models (Planned).
-    - Model Observability: Tracking model performance health (Planned).
+    - Streamlit in Snowflake: Visualizing model explainability (Planned).
     - Model Explainability: Support for calculating shaplay values (Planned).
+    - Model Observability: Tracking model performance health (Planned).
 
 ## Development Environment
 
 ### Code Quality Management
 - Ruff: Linting and formatting.
 - Mypy: Static type checking.
+- Pytest: Testing.
 
 ### Development Commands
 
@@ -45,8 +48,8 @@ A Makefile is provided for streamlined development tasks:
 - `make lint`: Run linter to check code quality.
 - `make format`: Run formatter to ensure consistent code style.
 - `make test`: Run tests using pytest.
-
-
+- `make deploy-sproc`: Deploy stored procedures.
+- `make deploy-task`: Deploy tasks.
 
 ## Setup
 
@@ -56,7 +59,7 @@ poetry install
 ```
 
 2. Configure Snowflake:
-- Create a file named connection_parameters.json in the root directory with the following structure:
+- Create a file named connection_parameters_dev.json, connection_parameters_prod.json in the root directory with the following structure:
   ```json
   {
     "account": "",
@@ -64,14 +67,33 @@ poetry install
     "password": "",
     "role": "",
     "warehouse": "",
-    "database": "",
+    "database": "", 
     "schema": ""
   }
   ```
   - Fill in the necessary connection details specific to your Snowflake account.
+    - For `connection_parameters_dev.json`, specify the development database name (`mlsystem_dev`).
+    - For `connection_parameters_prod.json`, specify the production database name (`mlsystem_prod`).
+
+
 
 3. Prepare and Upload Dataset
 - Run the following command to preprocess the dataset and upload it to Snowflake:
   ```bash
-  poetry run python src/adhoc/prepare_dataset.py
+  make setup
   ```
+
+4. Set Up Event Logging (Optional)
+- If you haven't configured an event table for Snowflake logging, execute the following SQL commands:
+  ```sql
+  CREATE EVENT TABLE <your_event_table_name>;
+  ALTER ACCOUNT SET EVENT_TABLE = <your_database_name>.<your_schema_name>.<your_event_table_name>;
+  ```
+
+5. Deploy Stored Procedures and Tasks
+- Run the following commands to deploy stored procedures and tasks:
+  ```bash
+  make deploy-sproc
+  make deploy-task
+  ```
+  Note: Tasks are automatically resumed during deployment. If you need to suspend them, please configure this separately through the Snowflake GUI.

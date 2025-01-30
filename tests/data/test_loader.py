@@ -34,8 +34,12 @@ def mock_snowflake_session(mocker):
     return session
 
 
-def test_fetch_dataset_training_mode(mock_snowflake_session):
+def test_fetch_dataset_training_mode(mock_snowflake_session, mocker):
     """学習モードでのデータ取得テスト"""
+    # 現在時刻をモック
+    mock_now = pd.Timestamp("2024-03-15")
+    mocker.patch("pandas.Timestamp.now", return_value=mock_now)
+
     # 実行
     df = fetch_dataset(mock_snowflake_session, is_training=True)
 
@@ -45,9 +49,12 @@ def test_fetch_dataset_training_mode(mock_snowflake_session):
 
     # SQLクエリに学習用の日付条件が含まれていることを確認
     sql_query = mock_snowflake_session.sql.call_args[0][0]
-    start_date = config["data"]["period"]["start_date"]
-    end_date = config["data"]["period"]["end_date"]
-    assert f"BETWEEN '{start_date}' AND '{end_date}'" in sql_query
+    period_months = config["data"]["period"]["months"]
+    expected_end_date = mock_now.strftime("%Y-%m-%d")
+    expected_start_date = (mock_now - pd.DateOffset(months=period_months)).strftime(
+        "%Y-%m-%d"
+    )
+    assert f"BETWEEN '{expected_start_date}' AND '{expected_end_date}'" in sql_query
 
 
 def test_fetch_dataset_inference_mode(mock_snowflake_session):

@@ -208,7 +208,8 @@ pyrightconfig.json
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,python
 
-connection_parameters.json
+connection_parameters_dev.json
+connection_parameters_prod.json
 sandbox.ipynb
 
 logs/
