@@ -56,7 +56,7 @@ poetry install
 ```
 
 2. Configure Snowflake:
-- Create a file named connection_parameters.json in the root directory with the following structure:
+- Create a file named connection_parameters_dev.json, connection_parameters_prod.json in the root directory with the following structure:
   ```json
   {
     "account": "",
@@ -64,14 +64,16 @@ poetry install
     "password": "",
     "role": "",
     "warehouse": "",
-    "database": "",
+    "database": "", 
     "schema": ""
   }
   ```
   - Fill in the necessary connection details specific to your Snowflake account.
+    - For `connection_parameters_dev.json`, specify the development database name (`mlsystem_dev`).
+    - For `connection_parameters_prod.json`, specify the production database name (`mlsystem_prod`).
 
 3. Prepare and Upload Dataset
 - Run the following command to preprocess the dataset and upload it to Snowflake:
   ```bash
-  poetry run python src/adhoc/prepare_dataset.py
+  make setup
   ```
