@@ -1,10 +1,17 @@
-.PHONY: test lint format all deploy-prediction-sproc deploy-training-sproc deploy-sproc
+.PHONY: setup test lint format all deploy-prediction-sproc deploy-training-sproc deploy-sproc
 
 POETRY = $(shell which poetry)
 POETRY_OPTION = --no-interaction --no-ansi
 POETRY_RUN = ${POETRY} run ${POETRY_OPTION}
 
 MYPY_OPTIONS = --install-types --non-interactive --ignore-missing-imports
+
+# ==============================
+# setup
+# ==============================
+
+setup:
+	${POETRY_RUN} python src/setup.py
 
 # ==============================
 # dev
