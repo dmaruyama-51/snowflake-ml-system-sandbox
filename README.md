@@ -4,6 +4,8 @@
 
 This repository serves as a personal sandbox for exploring and staying up-to-date with Snowflake's latest machine learning features. The primary focus is on implementing practical use cases to deepen understanding and evaluate the integration of Snowflake’s capabilities with Python-based workflows. Specifically, this sandbox demonstrates predicting and scoring customer purchasing intent in an online shopping context, storing these scores in Snowflake for downstream marketing applications.
 
+![system_overview](./images/overview.png)
+
 ## Usecase
 
 The system predicts customer purchasing intent based on session data from an online shopping platform. The daily batch processing pipeline:
