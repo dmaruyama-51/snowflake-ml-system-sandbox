@@ -37,10 +37,14 @@ def fetch_dataset(
 
         # 学習時と推論時で日付条件を分岐
         if is_training:
-            period_months = config["data"]["period"]["months"]  # 期間（月数）を設定から取得
+            period_months = config["data"]["period"][
+                "months"
+            ]  # 期間（月数）を設定から取得
             # 現在の日付から指定された月数前までの期間を設定
-            end_date = pd.Timestamp.now().strftime('%Y-%m-%d')
-            start_date = (pd.Timestamp.now() - pd.DateOffset(months=period_months)).strftime('%Y-%m-%d')
+            end_date = pd.Timestamp.now().strftime("%Y-%m-%d")
+            start_date = (
+                pd.Timestamp.now() - pd.DateOffset(months=period_months)
+            ).strftime("%Y-%m-%d")
             date_condition = f"SESSION_DATE BETWEEN '{start_date}' AND '{end_date}'"
             logger.info(
                 f"Retrieving training data: period from {start_date} to {end_date} ({period_months} months)"

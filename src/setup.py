@@ -1,21 +1,26 @@
 import logging
 from datetime import datetime
+
 from snowflake.snowpark import Session
 
 from src.data.dataset import create_ml_dataset
 from src.data.source import prepare_online_shoppers_data
+from src.utils.config import load_config
 from src.utils.logger import setup_logging
 from src.utils.snowflake import create_session
-from src.utils.config import load_config
 
 logger = logging.getLogger(__name__)
-config = load_config()
+
 
 def setup_environment(session: Session) -> None:
     try:
         setup_logging()
 
-        database_name = session.get_current_database() or config["data"]["snowflake"]["database_dev"]
+        config = load_config()
+        database_name = (
+            session.get_current_database()
+            or config["data"]["snowflake"]["database_dev"]
+        )
         schema_name = config["data"]["snowflake"]["schema"]
         source_table_name = config["data"]["snowflake"]["source_table"]
         dataset_table_name = config["data"]["snowflake"]["dataset_table"]
@@ -25,7 +30,9 @@ def setup_environment(session: Session) -> None:
         logger.info(f"Ensured database {database_name} exists")
 
         # スキーマが存在しない場合は作成
-        session.sql(f"CREATE SCHEMA IF NOT EXISTS {database_name}.{schema_name}").collect()
+        session.sql(
+            f"CREATE SCHEMA IF NOT EXISTS {database_name}.{schema_name}"
+        ).collect()
         logger.info(f"Ensured schema {schema_name} exists in database {database_name}")
 
         # ソーステーブルを作成
@@ -57,8 +64,7 @@ def setup_environment(session: Session) -> None:
                 SCORE FLOAT,
                 primary key (UID, SESSION_DATE)
             )        
-        """
-        ).collect()
+        """).collect()
         logger.info("Created SCORES table")
 
         # sproc ステージを作成
@@ -72,8 +78,10 @@ def setup_environment(session: Session) -> None:
         logger.error(f"An error occurred: {str(e)}")
         raise e
 
-if __name__ == "__main__":
-    logger.info("Creating Snowflake session")
-    session = create_session()
-    setup_environment(session)
 
+if __name__ == "__main__":
+    session = create_session()
+    if session is None:
+        raise ValueError("Failed to create Snowflake session")
+
+    setup_environment(session)

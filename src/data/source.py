@@ -6,8 +6,8 @@ import pandas as pd
 from snowflake.snowpark.session import Session
 from ucimlrepo import fetch_ucirepo
 
-from src.utils.snowflake import upload_dataframe_to_snowflake
 from src.utils.config import load_config
+from src.utils.snowflake import upload_dataframe_to_snowflake
 
 logger = logging.getLogger(__name__)
 
@@ -80,7 +80,11 @@ def prepare_online_shoppers_data(
     """
     try:
         config = load_config()
-        database_name = database_name or session.get_current_database() or config["data"]["snowflake"]["database_dev"]
+        database_name = (
+            database_name
+            or session.get_current_database()
+            or config["data"]["snowflake"]["database_dev"]
+        )
         schema_name = schema_name or config["data"]["snowflake"]["schema"]
         table_name = table_name or config["data"]["snowflake"]["source_table"]
 

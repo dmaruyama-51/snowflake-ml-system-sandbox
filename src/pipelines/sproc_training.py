@@ -98,7 +98,7 @@ def sproc_training(session: Session) -> int:
 if __name__ == "__main__":
     try:
         session = create_session()
-        if session is None:  # セッションがNoneの場合のチェックを追加
+        if session is None:
             raise RuntimeError("Failed to create Snowflake session")
 
         stage_location = f"@{session.get_current_database()}.{SCHEMA}.sproc"

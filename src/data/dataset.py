@@ -2,8 +2,8 @@ import logging
 
 from snowflake.snowpark.session import Session
 
-from src.utils.snowflake import upload_dataframe_to_snowflake
 from src.utils.config import load_config
+from src.utils.snowflake import upload_dataframe_to_snowflake
 
 logger = logging.getLogger(__name__)
 
@@ -30,10 +30,16 @@ def create_ml_dataset(
     """
     try:
         config = load_config()
-        database_name = database_name or session.get_current_database() or config["data"]["snowflake"]["database_dev"]
+        database_name = (
+            database_name
+            or session.get_current_database()
+            or config["data"]["snowflake"]["database_dev"]
+        )
         schema_name = schema_name or config["data"]["snowflake"]["schema"]
         table_name = table_name or config["data"]["snowflake"]["dataset_table"]
-        source_table_name = source_table_name or config["data"]["snowflake"]["source_table"]
+        source_table_name = (
+            source_table_name or config["data"]["snowflake"]["source_table"]
+        )
 
         logger.info(f"Starting dataset generation. Target date: {target_date}")
         gen_query = f"""

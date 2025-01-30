@@ -6,9 +6,9 @@ from snowflake.snowpark import Session
 
 from src.data.loader import fetch_dataset
 from src.models.predictor import load_latest_model_version, predict
+from src.utils.config import load_config
 from src.utils.logger import setup_logging
 from src.utils.snowflake import create_session, upload_dataframe_to_snowflake
-from src.utils.config import load_config
 
 logger = logging.getLogger(__name__)
 
@@ -62,7 +62,6 @@ def sproc_prediction(session: Session, prediction_date: str = "2024-10-01") -> i
             ["UID", "SESSION_DATE", "MODEL_NAME", "MODEL_VERSION", "SCORE"]
         ]
 
-        config = load_config()
         upload_dataframe_to_snowflake(
             session=session,
             df=scores_df,
@@ -82,7 +81,7 @@ def sproc_prediction(session: Session, prediction_date: str = "2024-10-01") -> i
 if __name__ == "__main__":
     try:
         session = create_session()
-        if session is None:  # セッションがNoneの場合のチェックを追加
+        if session is None:
             raise RuntimeError("Failed to create Snowflake session")
         stage_location = f"@{session.get_current_database()}.{SCHEMA}.sproc"
         sproc_config = {

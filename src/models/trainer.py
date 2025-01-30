@@ -93,33 +93,25 @@ def objective(
 
     params = {
         "n_estimators": trial.suggest_int(
-            "n_estimators",
-            rf_config["n_estimators_min"],
-            rf_config["n_estimators_max"]
+            "n_estimators", rf_config["n_estimators_min"], rf_config["n_estimators_max"]
         ),
         "max_depth": trial.suggest_int(
-            "max_depth",
-            rf_config["max_depth_min"],
-            rf_config["max_depth_max"]
+            "max_depth", rf_config["max_depth_min"], rf_config["max_depth_max"]
         ),
         "min_samples_split": trial.suggest_int(
             "min_samples_split",
             rf_config["min_samples_split_min"],
-            rf_config["min_samples_split_max"]
+            rf_config["min_samples_split_max"],
         ),
         "min_samples_leaf": trial.suggest_int(
             "min_samples_leaf",
             rf_config["min_samples_leaf_min"],
-            rf_config["min_samples_leaf_max"]
+            rf_config["min_samples_leaf_max"],
         ),
         "max_features": trial.suggest_categorical(
-            "max_features",
-            rf_config["max_features"]
+            "max_features", rf_config["max_features"]
         ),
-        "criterion": trial.suggest_categorical(
-            "criterion",
-            rf_config["criterion"]
-        ),
+        "criterion": trial.suggest_categorical("criterion", rf_config["criterion"]),
     }
 
     cv_scores = []

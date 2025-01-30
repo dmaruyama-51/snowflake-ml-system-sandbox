@@ -5,9 +5,9 @@ import sys
 from snowflake.snowpark import Session
 
 from src.data.dataset import update_ml_dataset
+from src.utils.config import load_config
 from src.utils.logger import setup_logging
 from src.utils.snowflake import create_session
-from src.utils.config import load_config
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +37,7 @@ def sproc_dataset(session: Session, target_date: str) -> int:
     """
     try:
         setup_logging()
-        
+
         database_name = session.get_current_database() or DATABASE_DEV
 
         update_ml_dataset(

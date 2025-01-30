@@ -1,7 +1,7 @@
 import json
 import logging
-from typing import Optional
 import os
+from typing import Optional
 
 import pandas as pd
 from snowflake.snowpark import (
@@ -25,12 +25,14 @@ def create_session() -> Optional[Session]:
     """
     try:
         logger.info("Starting Snowflake session creation")
-        
+
         # 環境変数からENVを取得
         env = os.getenv("ML_ENV", "dev")  # デフォルトはdev
         connection_parameters_path = f"connection_parameters_{env}.json"
-        
-        logger.debug(f"Loading configuration file for environment {env}: {connection_parameters_path}")
+
+        logger.debug(
+            f"Loading configuration file for environment {env}: {connection_parameters_path}"
+        )
         with open(connection_parameters_path) as f:
             connection_parameters = json.load(f)
         logger.info("Attempting to connect to Snowflake")
