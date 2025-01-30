@@ -89,16 +89,37 @@ def objective(
     Returns:
         score: PR-AUC
     """
+    rf_config = config["model"]["random_forest"]
 
     params = {
-        "n_estimators": trial.suggest_int("n_estimators", 10, 500),
-        "max_depth": trial.suggest_int("max_depth", 2, 30),
-        "min_samples_split": trial.suggest_int("min_samples_split", 2, 20),
-        "min_samples_leaf": trial.suggest_int("min_samples_leaf", 1, 10),
-        "max_features": trial.suggest_categorical(
-            "max_features", ["sqrt", "log2", None]
+        "n_estimators": trial.suggest_int(
+            "n_estimators",
+            rf_config["n_estimators_min"],
+            rf_config["n_estimators_max"]
         ),
-        "criterion": trial.suggest_categorical("criterion", ["gini", "entropy"]),
+        "max_depth": trial.suggest_int(
+            "max_depth",
+            rf_config["max_depth_min"],
+            rf_config["max_depth_max"]
+        ),
+        "min_samples_split": trial.suggest_int(
+            "min_samples_split",
+            rf_config["min_samples_split_min"],
+            rf_config["min_samples_split_max"]
+        ),
+        "min_samples_leaf": trial.suggest_int(
+            "min_samples_leaf",
+            rf_config["min_samples_leaf_min"],
+            rf_config["min_samples_leaf_max"]
+        ),
+        "max_features": trial.suggest_categorical(
+            "max_features",
+            rf_config["max_features"]
+        ),
+        "criterion": trial.suggest_categorical(
+            "criterion",
+            rf_config["criterion"]
+        ),
     }
 
     cv_scores = []

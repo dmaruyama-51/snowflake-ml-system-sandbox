@@ -1,16 +1,16 @@
 data:
   snowflake:
-    database: "practice"
+    database_prod: "practice"
+    database_dev: "practice_dev"
     schema: "ml"
-    table: "online_shoppers_intention"
+    dataset_table: "dataset"
+    source_table: "online_shoppers_intention"
 
-  period:
-    start_date: "2024-01-01"
-    end_date: "2024-06-01"
-
+  # 目的変数
   target:
     - "REVENUE"
   
+  # 説明変数
   features:
     numeric:
       - "ADMINISTRATIVE"
@@ -31,6 +31,11 @@ data:
       - "VISITORTYPE"
       - "WEEKEND"
   
+  # 実行日から何ヶ月前までをTraining期間とするか
+  period:
+    months: 3
+
+  # テストデータの分割
   split:
     test_size: 0.2
     random_state: 0
@@ -40,3 +45,15 @@ model:
     n_splits: 5
   random_forest:
     random_state: 0
+
+    # optuna での探索範囲
+    n_estimators_min: 10
+    n_estimators_max: 500
+    max_depth_min: 2
+    max_depth_max: 30
+    min_samples_split_min: 2
+    min_samples_split_max: 20
+    min_samples_leaf_min: 1
+    min_samples_leaf_max: 10
+    max_features: ["sqrt", "log2"]
+    criterion: ["gini", "entropy"]
