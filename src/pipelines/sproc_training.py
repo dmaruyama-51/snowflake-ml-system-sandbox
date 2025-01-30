@@ -60,37 +60,16 @@ def sproc_training(session: Session) -> int:
         version_name = f"v_{datetime.now().strftime('%y%m%d_%H%M%S')}"
 
         registry = Registry(session=session)
-        model_ref = registry.log_model(
+        _ = registry.log_model(
             model=model_pipeline,
             model_name="random_forest",
             version_name=version_name,
             metrics=test_scores,
-            sample_input_data=df_train_val.drop(columns=["REVENUE"]).head(1),
-            metadata={
-                "description": "オンラインショッピングの購買意向予測モデル",
-                "target_variable": "REVENUE",
-                "training_date": datetime.now().strftime("%Y-%m-%d"),
-                "feature_names": list(df_train_val.drop(columns=["REVENUE"]).columns),
-                "model_type": "RandomForestClassifier",
-            },
+            sample_input_data=df_train_val.drop(columns=["REVENUE"]).head(
+                1
+            ),  # サンプル入力データを追加
         )
         logger.info("Model logging completed")
-
-        # モニターの作成
-        create_monitor_sql = f"""
-        CREATE MODEL MONITOR random_forest_monitor
-        WITH
-            MODEL = {model_ref._model_name}
-            VERSION {model_ref._version_name}
-            FUNCTION = predict_proba
-            SOURCE = ONLINE_SHOPPERS_INTENTION
-            WAREHOUSE = COMPUTE_WH
-            REFRESH_INTERVAL = '1 day'
-            AGGREGATION_WINDOW = '1 day'
-            TIMESTAMP_COLUMN = SESSION_DATE
-        """
-        session.sql(create_monitor_sql).collect()
-        logger.info("Model monitor created successfully")
 
         return 1
 
