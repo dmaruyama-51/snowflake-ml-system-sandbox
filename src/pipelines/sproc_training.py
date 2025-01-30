@@ -15,15 +15,32 @@ from src.utils.snowflake import create_session
 
 logger = logging.getLogger(__name__)
 
+config = load_config()
+DATABASE_DEV = config["data"]["snowflake"]["database_dev"]
+SCHEMA = config["data"]["snowflake"]["schema"]
+DATASET = config["data"]["snowflake"]["dataset_table"]
+SOURCE = config["data"]["snowflake"]["source_table"]
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 IMPORTS_DIR = os.path.join(BASE_DIR, "src")
 
 
 def sproc_training(session: Session) -> int:
-    try:
-        setup_logging()  # ロギング設定の初期化
+    """
+    モデルの学習
 
-        config = load_config()
+    Args:
+        session (Session): Snowflakeセッション
+
+    Returns:
+        int: 成功時は1、失敗時は例外を発生
+
+    Raises:
+        Exception: 処理中にエラーが発生した場合
+    """
+    try:
+        setup_logging()
+
         target_column = config["data"]["target"]
 
         df = fetch_dataset(session, is_training=True)
@@ -65,7 +82,7 @@ def sproc_training(session: Session) -> int:
             model_name="random_forest",
             version_name=version_name,
             metrics=test_scores,
-            sample_input_data=df_train_val.drop(columns=["REVENUE"]).head(
+            sample_input_data=df_train_val.drop(columns=[target_column]).head(
                 1
             ),  # サンプル入力データを追加
         )
@@ -84,7 +101,7 @@ if __name__ == "__main__":
         if session is None:  # セッションがNoneの場合のチェックを追加
             raise RuntimeError("Failed to create Snowflake session")
 
-        stage_location = f"@{session.get_current_database}.{session.get_current_schema}.sproc"
+        stage_location = f"@{session.get_current_database()}.{SCHEMA}.sproc"
         sproc_config = {
             "name": "TRAINING",
             "is_permanent": True,

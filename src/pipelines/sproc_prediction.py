@@ -12,13 +12,19 @@ from src.utils.config import load_config
 
 logger = logging.getLogger(__name__)
 
+config = load_config()
+DATABASE_DEV = config["data"]["snowflake"]["database_dev"]
+SCHEMA = config["data"]["snowflake"]["schema"]
+DATASET = config["data"]["snowflake"]["dataset_table"]
+SOURCE = config["data"]["snowflake"]["source_table"]
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 IMPORTS_DIR = os.path.join(BASE_DIR, "src")
 
 
 def sproc_prediction(session: Session, prediction_date: str = "2024-10-01") -> int:
     """
-    推論Sprocの処理内容
+    指定日のデータにおける推論処理
 
     Args:
         session (Session): Snowflakeセッション
@@ -60,8 +66,8 @@ def sproc_prediction(session: Session, prediction_date: str = "2024-10-01") -> i
         upload_dataframe_to_snowflake(
             session=session,
             df=scores_df,
-            database_name=session.get_current_database() or config["data"]["snowflake"]["database_dev"],
-            schema_name=config["data"]["snowflake"]["schema"],
+            database_name=session.get_current_database() or DATABASE_DEV,
+            schema_name=SCHEMA,
             table_name="SCORES",
             mode="append",
         )
@@ -78,7 +84,7 @@ if __name__ == "__main__":
         session = create_session()
         if session is None:  # セッションがNoneの場合のチェックを追加
             raise RuntimeError("Failed to create Snowflake session")
-        stage_location = f"@{session.get_current_database}.{session.get_current_schema}.sproc"
+        stage_location = f"@{session.get_current_database()}.{SCHEMA}.sproc"
         sproc_config = {
             "name": "PREDICTION",
             "is_permanent": True,

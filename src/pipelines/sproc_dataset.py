@@ -7,8 +7,15 @@ from snowflake.snowpark import Session
 from src.data.dataset import update_ml_dataset
 from src.utils.logger import setup_logging
 from src.utils.snowflake import create_session
+from src.utils.config import load_config
 
 logger = logging.getLogger(__name__)
+
+config = load_config()
+DATABASE_DEV = config["data"]["snowflake"]["database_dev"]
+SCHEMA = config["data"]["snowflake"]["schema"]
+DATASET = config["data"]["snowflake"]["dataset_table"]
+SOURCE = config["data"]["snowflake"]["source_table"]
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 IMPORTS_DIR = os.path.join(BASE_DIR, "src")
@@ -16,11 +23,11 @@ IMPORTS_DIR = os.path.join(BASE_DIR, "src")
 
 def sproc_dataset(session: Session, target_date: str) -> int:
     """
-    推論Sprocの処理内容
+    sourceテーブルから対象日のデータをdatasetテーブルに格納
 
     Args:
         session (Session): Snowflakeセッション
-        prediction_date (str): 推論日付（YYYY-MM-DD）
+        target_date (str): 対象の日付（YYYY-MM-DD）
 
     Returns:
         int: 成功時は1、失敗時は例外を発生
@@ -30,18 +37,16 @@ def sproc_dataset(session: Session, target_date: str) -> int:
     """
     try:
         setup_logging()
-
-        # データベース名とスキーマ名を取得し、Noneの場合はデフォルト値を使用
-        database_name = session.get_current_database() or "practice"
-        schema_name = session.get_current_schema() or "ml"
+        
+        database_name = session.get_current_database() or DATABASE_DEV
 
         update_ml_dataset(
             session=session,
             target_date=target_date,
             database_name=database_name,
-            schema_name=schema_name,
-            table_name="dataset",
-            source_table_name="online_shoppers_intention",
+            schema_name=SCHEMA,
+            table_name=DATASET,
+            source_table_name=SOURCE,
         )
         return 1
 
@@ -56,14 +61,16 @@ if __name__ == "__main__":
         if session is None:  # セッションがNoneの場合のチェックを追加
             raise RuntimeError("Failed to create Snowflake session")
 
+        stage_location = f"@{session.get_current_database()}.{SCHEMA}.sproc"
         sproc_config = {
             "name": "DATASET",
             "is_permanent": True,
-            "stage_location": "@practice.ml.sproc",
+            "stage_location": stage_location,
             "packages": ["snowflake-snowpark-python"],
             "imports": [
                 (os.path.join(IMPORTS_DIR, "data"), "src.data"),
                 (os.path.join(IMPORTS_DIR, "utils/logger.py"), "src.utils.logger"),
+                (os.path.join(IMPORTS_DIR, "utils/config.py"), "src.utils.config"),
                 (
                     os.path.join(IMPORTS_DIR, "utils/snowflake.py"),
                     "src.utils.snowflake",

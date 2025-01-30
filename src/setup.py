@@ -59,6 +59,14 @@ def setup_environment(session: Session) -> None:
             )        
         """
         ).collect()
+        logger.info("Created SCORES table")
+
+        # sproc ステージを作成
+        session.sql("""
+            CREATE STAGE IF NOT EXISTS sproc
+            DIRECTORY = (ENABLE = TRUE)
+        """).collect()
+        logger.info("Created sproc stage")
 
     except Exception as e:
         logger.error(f"An error occurred: {str(e)}")
