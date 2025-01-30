@@ -1,3 +1,4 @@
+import random
 import uuid
 
 import pandas as pd
@@ -5,6 +6,51 @@ from snowflake.snowpark.session import Session
 from ucimlrepo import fetch_ucirepo
 
 from src.utils.snowflake import create_session, upload_dataframe_to_snowflake
+
+# MONTHカラムの値を月番号に変換する辞書
+MONTH_TO_NUM = {
+    "Jan": "01",
+    "Feb": "02",
+    "Mar": "03",
+    "Apr": "04",
+    "May": "05",
+    "June": "06",
+    "Jul": "07",
+    "Aug": "08",
+    "Sep": "09",
+    "Oct": "10",
+    "Nov": "11",
+    "Dec": "12",
+}
+
+
+def get_year(month: str) -> str:
+    """月に応じて年を設定する"""
+    return (
+        "2025"
+        if month in ["Jan", "Feb", "Mar", "Apr", "May", "June", "Jul", "Aug", "Sep"]
+        else "2024"
+    )
+
+
+def get_random_day(month: str) -> str:
+    """月に応じて日付をランダムに割り振る"""
+    random.seed(0)
+    days_in_month = {
+        "Apr": 30,
+        "June": 30,
+        "Sep": 30,
+        "Nov": 30,
+        "Feb": 28,  # 2024/2025年なので2月は28日
+        "Jan": 31,
+        "Mar": 31,
+        "May": 31,
+        "Jul": 31,
+        "Aug": 31,
+        "Oct": 31,
+        "Dec": 31,
+    }
+    return str(random.randint(1, days_in_month[month])).zfill(2)
 
 
 def prepare_online_shoppers_data(
@@ -34,25 +80,10 @@ def prepare_online_shoppers_data(
         df_target: pd.DataFrame = dataset.data.targets
         df["revenue"] = df_target["Revenue"]
 
-        # MONTHカラムの値を月番号に変換する辞書を作成
-        month_to_num = {
-            "Jan": "01",
-            "Feb": "02",
-            "Mar": "03",
-            "Apr": "04",
-            "May": "05",
-            "June": "06",
-            "Jul": "07",
-            "Aug": "08",
-            "Sep": "09",
-            "Oct": "10",
-            "Nov": "11",
-            "Dec": "12",
-        }
-
-        # 月しかわからないため、日付は 2024-xx-01 とする
         df["SESSION_DATE"] = pd.to_datetime(
-            "2024" + df["Month"].map(month_to_num) + "01"
+            df["Month"].apply(get_year)
+            + df["Month"].map(MONTH_TO_NUM)
+            + df["Month"].apply(get_random_day)
         )
         # ユーザーIDをランダムに生成
         df["UID"] = [str(uuid.uuid4()) for _ in range(len(df))]
