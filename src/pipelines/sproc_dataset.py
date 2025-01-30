@@ -4,7 +4,7 @@ import sys
 
 from snowflake.snowpark import Session
 
-from src.data.ml_dataset import update_ml_dataset
+from src.data.dataset import update_ml_dataset
 from src.utils.logger import setup_logging
 from src.utils.snowflake import create_session
 
@@ -30,11 +30,16 @@ def sproc_dataset(session: Session, target_date: str) -> int:
     """
     try:
         setup_logging()
-        _ = update_ml_dataset(
-            session, 
-            database_name=session.get_current_database(),
-            schema_name=session.get_current_schema(),
+        
+        # データベース名とスキーマ名を取得し、Noneの場合はデフォルト値を使用
+        database_name = session.get_current_database() or "practice"
+        schema_name = session.get_current_schema() or "ml"
+        
+        update_ml_dataset(
+            session=session, 
             target_date=target_date,
+            database_name=database_name,
+            schema_name=schema_name,
             table_name="dataset",
             source_table_name="online_shoppers_intention",
         )

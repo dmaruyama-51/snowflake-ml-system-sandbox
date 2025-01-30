@@ -1,10 +1,10 @@
+import logging
 from datetime import datetime
 
-from src.data.ml_dataset import create_ml_dataset
+from src.data.dataset import create_ml_dataset
 from src.data.source import prepare_online_shoppers_data
-from src.utils.snowflake import create_session
 from src.utils.logger import setup_logging
-import logging
+from src.utils.snowflake import create_session
 
 logger = logging.getLogger(__name__)
 

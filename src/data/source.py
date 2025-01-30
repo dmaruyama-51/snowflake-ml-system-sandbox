@@ -1,3 +1,4 @@
+import logging
 import random
 import uuid
 
@@ -6,7 +7,6 @@ from snowflake.snowpark.session import Session
 from ucimlrepo import fetch_ucirepo
 
 from src.utils.snowflake import upload_dataframe_to_snowflake
-import logging
 
 logger = logging.getLogger(__name__)
 

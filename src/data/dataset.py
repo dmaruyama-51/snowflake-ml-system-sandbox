@@ -1,5 +1,7 @@
+import logging
+
 from snowflake.snowpark.session import Session
-import logging 
+
 from src.utils.snowflake import upload_dataframe_to_snowflake
 
 logger = logging.getLogger(__name__)
@@ -7,8 +9,8 @@ logger = logging.getLogger(__name__)
 def create_ml_dataset(
     session: Session, 
     target_date: str,
-    database_name: str,
-    schema_name: str,
+    database_name: str = "practice",
+    schema_name: str = "ml",
     table_name: str = "dataset",
     source_table_name: str = "online_shoppers_intention",
     ) -> None:
@@ -62,8 +64,8 @@ def create_ml_dataset(
 def update_ml_dataset(
     session: Session, 
     target_date: str,
-    database_name: str,
-    schema_name: str,
+    database_name: str = "practice",
+    schema_name: str = "ml",
     table_name: str = "dataset",
     source_table_name: str = "online_shoppers_intention",
     ) -> None:

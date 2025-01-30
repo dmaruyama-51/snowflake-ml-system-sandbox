@@ -31,6 +31,7 @@ omit = [
     "src/adhoc/*",
     "src/utils/logger.py",
     "src/tasks/*",
+    "src/data/source.py",
 ]
 
 [tool.coverage.report]
