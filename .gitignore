@@ -213,3 +213,6 @@ connection_parameters_prod.json
 sandbox.ipynb
 
 logs/
+
+# streamlit の接続情報
+**/streamlit/**/.snowflake/

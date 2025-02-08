@@ -28,6 +28,13 @@ format:
 all: test lint format
 
 # ==============================
+# streamlit
+# ==============================
+
+run-streamlit: __require_streamlit_app_name__
+	${POETRY_RUN} streamlit run src/streamlit/${APP_NAME}/app.py
+
+# ==============================
 # deploy
 # ==============================
 
@@ -52,3 +59,11 @@ deploy-task-training:
 	${POETRY_RUN} python src/tasks/task_training.py
 
 deploy-task: deploy-task-dataset deploy-task-prediction deploy-task-training
+
+deploy-streamlit: __require_streamlit_app_name__
+	cd src/streamlit/${APP_NAME} && \
+		${POETRY_RUN} snow --config-file .snowflake/config.toml \
+			streamlit deploy --replace
+
+__require_streamlit_app_name__:
+	@[ -n "$(APP_NAME)" ] || (echo "[ERROR] Parameter [APP_NAME] is requierd" 1>&2 && echo "(e.g) make xxx APP_NAME=hoge" 1>&2 && exit 1)
