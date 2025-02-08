@@ -82,7 +82,7 @@ def sproc_training(session: Session) -> int:
             model_name="random_forest",
             version_name=version_name,
             metrics=test_scores,
-            sample_input_data=df_train_val.drop(columns=[target_column]).head(
+            sample_input_data=df_train_val.drop(columns=target_column).head(
                 1
             ),  # サンプル入力データを追加
         )

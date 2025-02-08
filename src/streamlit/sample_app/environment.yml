@@ -1,0 +1,5 @@
+name: snowflake_env
+channels:
+  - snowflake
+dependencies:
+  - pandas
