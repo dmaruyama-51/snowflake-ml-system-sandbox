@@ -1,3 +1,3 @@
 import streamlit as st
 
-st.title(f"Example streamlit app.")
+st.title("Example streamlit app.")
