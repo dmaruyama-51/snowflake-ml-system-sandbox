@@ -13,7 +13,7 @@ def test_sproc_prediction_success(mocker):
     test_data = pd.DataFrame({"UID": [1, 2], "FEATURE1": [0.1, 0.2]})
 
     # 各依存関数のモック化
-    mock_fetch = mocker.patch("src.pipelines.sproc_prediction.fetch_dataset")
+    mock_fetch = mocker.patch("src.pipelines.sproc_prediction.fetch_prediction_dataset")
     mock_fetch.return_value = test_data
 
     # モデルバージョンのモック
@@ -40,7 +40,7 @@ def test_sproc_prediction_success(mocker):
     # アサーション
     assert result == 1
     mock_fetch.assert_called_once_with(
-        mock_session, is_training=False, prediction_date="2024-03-20"
+        mock_session, prediction_date="2024-03-20"
     )
     mock_load_model.assert_called_once_with(mock_session)
     mock_predict.assert_called_once()
@@ -49,11 +49,11 @@ def test_sproc_prediction_success(mocker):
 
 def test_sproc_prediction_fetch_dataset_returns_none(mocker):
     mock_session = mocker.Mock(spec=Session)
-    mock_fetch = mocker.patch("src.pipelines.sproc_prediction.fetch_dataset")
+    mock_fetch = mocker.patch("src.pipelines.sproc_prediction.fetch_prediction_dataset")
     mock_fetch.return_value = None
 
     with pytest.raises(ValueError, match="Failed to fetch dataset"):
         sproc_prediction(mock_session, "2024-03-20")
     mock_fetch.assert_called_once_with(
-        mock_session, is_training=False, prediction_date="2024-03-20"
+        mock_session, prediction_date="2024-03-20"
     )

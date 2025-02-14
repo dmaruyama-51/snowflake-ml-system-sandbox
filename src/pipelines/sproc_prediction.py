@@ -4,7 +4,7 @@ import sys
 
 from snowflake.snowpark import Session
 
-from src.data.loader import fetch_dataset
+from src.data.loader import fetch_prediction_dataset
 from src.models.predictor import load_latest_model_version, predict
 from src.utils.config import load_config
 from src.utils.logger import setup_logging
@@ -37,11 +37,11 @@ def sproc_prediction(session: Session, prediction_date: str = "2024-10-01") -> i
         Exception: 処理中にエラーが発生した場合
     """
     try:
-        setup_logging()  # ロギング設定の初期化
+        setup_logging() 
 
         logger.info(f"Starting prediction process, prediction_date={prediction_date}")
 
-        df = fetch_dataset(session, is_training=False, prediction_date=prediction_date)
+        df = fetch_prediction_dataset(session, prediction_date=prediction_date)
         if df is None:
             raise ValueError("Failed to fetch dataset")
         features = df.drop(columns=["UID"])

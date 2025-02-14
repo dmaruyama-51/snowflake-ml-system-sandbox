@@ -6,7 +6,7 @@ from datetime import datetime
 from snowflake.ml.registry import Registry
 from snowflake.snowpark import Session
 
-from src.data.loader import fetch_dataset
+from src.data.loader import fetch_training_dataset
 from src.data.preprocessing import split_data
 from src.models.trainer import calc_evaluation_metrics, train_model
 from src.utils.config import load_config
@@ -43,7 +43,7 @@ def sproc_training(session: Session) -> int:
 
         target_column = config["data"]["target"]
 
-        df = fetch_dataset(session, is_training=True)
+        df = fetch_training_dataset(session)
         if df is None:
             raise ValueError("Failed to fetch dataset")
         logger.info(f"Dataset fetched successfully. Number of rows: {len(df)}")

@@ -11,14 +11,12 @@ def test_sproc_training_success(mocker):
     mock_session = mocker.Mock(spec=Session)
 
     # 各依存関数のモック化
-    mock_fetch = mocker.patch("src.pipelines.sproc_training.fetch_dataset")
-    mock_fetch.return_value = pd.DataFrame(
-        {
-            "UID": ["user1", "user2"],
-            "FEATURE1": [0.1, 0.2],
-            "REVENUE": [0, 1],  # TARGETをREVENUEに変更
-        }
-    )
+    mock_fetch = mocker.patch("src.pipelines.sproc_training.fetch_training_dataset")
+    mock_fetch.return_value = pd.DataFrame({
+        "UID": ["user1", "user2"],
+        "FEATURE1": [0.1, 0.2],
+        "REVENUE": [0, 1],
+    })
 
     mock_split = mocker.patch("src.pipelines.sproc_training.split_data")
     mock_split.return_value = (
@@ -50,7 +48,7 @@ def test_sproc_training_success(mocker):
 
 def test_sproc_training_fetch_dataset_returns_none(mocker):
     mock_session = mocker.Mock(spec=Session)
-    mock_fetch = mocker.patch("src.pipelines.sproc_training.fetch_dataset")
+    mock_fetch = mocker.patch("src.pipelines.sproc_training.fetch_training_dataset")
     mock_fetch.return_value = None
 
     with pytest.raises(ValueError, match="Failed to fetch dataset"):
