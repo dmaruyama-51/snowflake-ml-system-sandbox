@@ -27,6 +27,15 @@ def load_latest_model_version(session: Session) -> ModelVersion:
 
     return mv
 
+def load_default_model_version(session: Session) -> ModelVersion:
+    """
+    デフォルトバージョンを取得する
+    """
+    registry = Registry(session=session)
+    model_ref = registry.get_model("random_forest")
+    mv = model_ref.default
+    return mv
+
 
 def predict(features: pd.DataFrame, mv: ModelVersion) -> np.ndarray:
     """

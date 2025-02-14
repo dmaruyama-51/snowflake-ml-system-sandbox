@@ -86,6 +86,8 @@ def sproc_training(session: Session) -> int:
                 1
             ),  # サンプル入力データを追加
         )
+
+        # ToDo: 本当は新モデルには challenger タグをつけて管理したい（2025/02/14現在, タグは Enterprise以上でしか利用できない）
         logger.info("Model logging completed")
 
         return 1
