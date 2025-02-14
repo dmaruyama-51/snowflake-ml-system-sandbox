@@ -3,8 +3,10 @@ from typing import Optional
 
 import pandas as pd
 from snowflake.snowpark import Session
+from snowflake.ml.registry import ModelVersion
 
 from src.utils.config import load_config
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 config = load_config()
@@ -91,3 +93,44 @@ def fetch_prediction_dataset(session: Session, prediction_date: str) -> pd.DataF
     except Exception as e:
         logger.error(f"Error occurred during prediction dataset retrieval: {str(e)}")
         raise RuntimeError(f"Error occurred during prediction dataset retrieval: {str(e)}")
+
+def fetch_test_dataset(session: Session, model_version: ModelVersion) -> pd.DataFrame:
+    """テスト用データセットを取得する関数
+    
+    Args:
+        session (Session): Snowflakeセッション
+        model_version (ModelVersion): 評価対象のモデルバージョン
+
+    Returns:
+        pd.DataFrame: 取得したデータフレーム
+    """
+    try:
+        schema, table, select_columns = _get_base_config()
+        
+        # モデルバージョンの作成日を取得
+        model_version_name = model_version.version_name
+        model_created_date = datetime.strptime(model_version_name[2:8], '%y%m%d')
+        
+        # 評価期間の設定（モデル作成日から2週間）
+        start_date = (model_created_date + pd.DateOffset(days=1)).strftime("%Y-%m-%d")
+        end_date = (model_created_date + pd.DateOffset(days=14)).strftime("%Y-%m-%d")
+        date_condition = f"SESSION_DATE BETWEEN '{start_date}' AND '{end_date}'"
+        
+        logger.info(f"Retrieving testing data: period from {start_date} to {end_date}")
+        
+        query_string = f"""
+            SELECT {', '.join(select_columns)} 
+            FROM {schema}.{table}
+            WHERE {date_condition}
+        """
+        df = session.sql(query_string).to_pandas()
+
+        if len(df) == 0:
+            raise ValueError("No data found for the specified period.")
+
+        logger.info(f"Testing dataset retrieval completed: {len(df)} rows")
+        return df
+
+    except Exception as e:
+        logger.error(f"Error occurred during testing dataset retrieval: {str(e)}")
+        raise RuntimeError(f"Error occurred during testing dataset retrieval: {str(e)}")
