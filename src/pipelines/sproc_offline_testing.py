@@ -4,7 +4,11 @@ import sys
 
 from snowflake.snowpark import Session
 
-from src.models.predictor import load_default_model_version, load_latest_model_version
+from snowflake.ml.registry import Registry
+
+from src.data.loader import fetch_test_dataset
+from src.models.trainer import calc_evaluation_metrics
+from src.models.predictor import load_default_model_version, load_latest_model_version, predict_proba, predict_label
 from src.utils.config import load_config
 from src.utils.logger import setup_logging
 from src.utils.snowflake import create_session
@@ -44,8 +48,29 @@ def sproc_offline_testing(session: Session) -> int:
         challenger_mv = load_latest_model_version(session)
 
         # テストデータの取得
+        test_df = fetch_test_dataset(session, challenger_mv)
+        TARGET_COL = config["data"]["target"][0]
+        test_features = test_df.drop(columns=[TARGET_COL, "UID"])
+        test_target = test_df[TARGET_COL]
 
         # モデル比較
+        challenger_pred_proba = predict_proba(test_features, challenger_mv)
+        champion_pred_proba = predict_proba(test_features, champion_mv)
+        challenger_pred_label = predict_label(test_features, challenger_mv)
+        champion_pred_label = predict_label(test_features, champion_mv)
+        challenger_scores = calc_evaluation_metrics(test_target, challenger_pred_label, challenger_pred_proba)
+        champion_scores = calc_evaluation_metrics(test_target, champion_pred_label, champion_pred_proba)
+
+        if challenger_scores["PR-AUC"] > champion_scores["PR-AUC"]:
+            logger.info("Challenger model is better than Champion model. Updating default version.")
+
+            # default version を challenger に変更
+            registry = Registry(session=session)
+            m = registry.get_model("random_forest")
+            m.default = challenger_mv
+
+        else:
+            logger.info("Champion model is better than Challenger model. No action is taken.")
 
         return 1
 

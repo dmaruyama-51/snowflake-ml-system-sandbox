@@ -27,7 +27,7 @@ def test_sproc_prediction_success(mocker):
     mock_load_model.return_value = mock_model_version
 
     # 予測値のモック
-    mock_predict = mocker.patch("src.pipelines.sproc_prediction.predict")
+    mock_predict = mocker.patch("src.pipelines.sproc_prediction.predict_proba")
     mock_predict.return_value = [0.8, 0.9]
 
     mock_upload = mocker.patch(

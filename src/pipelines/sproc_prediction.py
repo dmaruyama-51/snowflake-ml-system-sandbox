@@ -5,7 +5,7 @@ import sys
 from snowflake.snowpark import Session
 
 from src.data.loader import fetch_prediction_dataset
-from src.models.predictor import load_latest_model_version, predict
+from src.models.predictor import load_latest_model_version, predict_proba
 from src.utils.config import load_config
 from src.utils.logger import setup_logging
 from src.utils.snowflake import create_session, upload_dataframe_to_snowflake
@@ -50,7 +50,7 @@ def sproc_prediction(session: Session, prediction_date: str = "2024-10-01") -> i
         mv = load_latest_model_version(session)
         logger.info("Model loading completed")
 
-        df["SCORE"] = predict(features, mv)
+        df["SCORE"] = predict_proba(features, mv)
         logger.info("Prediction completed")
 
         # 推論結果をスコアテーブルに書き込み
