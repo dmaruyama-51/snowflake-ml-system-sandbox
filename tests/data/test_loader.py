@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-from src.data.loader import fetch_training_dataset, fetch_prediction_dataset
+from src.data.loader import fetch_training_dataset, fetch_prediction_dataset, fetch_test_dataset
 from src.utils.config import load_config
 
 config = load_config()
@@ -166,3 +166,59 @@ def test_fetch_empty_prediction_dataset(mocker):
         fetch_prediction_dataset(empty_session, prediction_date="2024-12-01")
 
     assert "Error occurred during prediction dataset retrieval" in str(exc_info.value)
+
+
+def test_fetch_test_dataset(mock_snowflake_session, mocker):
+    """テスト用データセット取得のテスト"""
+    # モデルバージョンのモック作成
+    mock_model_version = mocker.Mock()
+    mock_model_version.version_name = "V_250130_121116"  # 2024年3月15日のモデル
+
+    # 実行
+    df = fetch_test_dataset(mock_snowflake_session, mock_model_version)
+
+    # アサーション
+    assert df is not None
+    assert isinstance(df, pd.DataFrame)
+
+    # SQLクエリにテスト用の日付条件が含まれていることを確認
+    sql_query = mock_snowflake_session.sql.call_args[0][0]
+    expected_start_date = "2025-01-31"  # モデル作成日の翌日
+    expected_end_date = "2025-02-13"    # モデル作成日から14日後
+    assert f"BETWEEN '{expected_start_date}' AND '{expected_end_date}'" in sql_query
+
+
+def test_fetch_test_dataset_error(mocker):
+    """テスト用データセット取得時のエラーハンドリングテスト"""
+    # エラーを発生させるモックセッション
+    error_session = mocker.Mock()
+    error_session.sql.side_effect = Exception("Database connection failed")
+    
+    # モデルバージョンのモック
+    mock_model_version = mocker.Mock()
+    mock_model_version.version_name = "V_250130_121116"
+
+    # エラーが発生することを確認
+    with pytest.raises(RuntimeError) as exc_info:
+        fetch_test_dataset(error_session, mock_model_version)
+
+    assert "Error occurred during testing dataset retrieval" in str(exc_info.value)
+
+
+def test_fetch_empty_test_dataset(mocker):
+    """空のテスト用データセットが返された場合のテスト"""
+    # 空のデータフレームを返すモックセッション
+    empty_session = mocker.Mock()
+    empty_result = mocker.Mock()
+    empty_result.to_pandas.return_value = pd.DataFrame()
+    empty_session.sql.return_value = empty_result
+
+    # モデルバージョンのモック
+    mock_model_version = mocker.Mock()
+    mock_model_version.version_name = "V_250130_121116"
+
+    # エラーが発生することを確認
+    with pytest.raises(RuntimeError) as exc_info:
+        fetch_test_dataset(empty_session, mock_model_version)
+
+    assert "Error occurred during testing dataset retrieval" in str(exc_info.value)

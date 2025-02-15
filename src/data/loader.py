@@ -3,7 +3,7 @@ from typing import Optional
 
 import pandas as pd
 from snowflake.snowpark import Session
-from snowflake.ml.registry import ModelVersion
+from snowflake.ml.model import ModelVersion
 
 from src.utils.config import load_config
 from datetime import datetime
@@ -109,7 +109,7 @@ def fetch_test_dataset(session: Session, model_version: ModelVersion) -> pd.Data
         
         # モデルバージョンの作成日を取得
         model_version_name = model_version.version_name
-        model_created_date = datetime.strptime(model_version_name[2:8], '%y%m%d')
+        model_created_date = datetime.strptime(f"20{model_version_name[2:8]}", '%Y%m%d')
         
         # 評価期間の設定（モデル作成日から2週間）
         start_date = (model_created_date + pd.DateOffset(days=1)).strftime("%Y-%m-%d")
