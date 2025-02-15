@@ -27,6 +27,7 @@ def load_latest_model_version(session: Session) -> ModelVersion:
 
     return mv
 
+
 def load_default_model_version(session: Session) -> ModelVersion:
     """
     デフォルトバージョンを取得する

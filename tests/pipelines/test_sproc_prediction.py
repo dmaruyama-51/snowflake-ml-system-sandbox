@@ -39,9 +39,7 @@ def test_sproc_prediction_success(mocker):
 
     # アサーション
     assert result == 1
-    mock_fetch.assert_called_once_with(
-        mock_session, prediction_date="2024-03-20"
-    )
+    mock_fetch.assert_called_once_with(mock_session, prediction_date="2024-03-20")
     mock_load_model.assert_called_once_with(mock_session)
     mock_predict.assert_called_once()
     mock_upload.assert_called_once()
@@ -54,6 +52,4 @@ def test_sproc_prediction_fetch_dataset_returns_none(mocker):
 
     with pytest.raises(ValueError, match="Failed to fetch dataset"):
         sproc_prediction(mock_session, "2024-03-20")
-    mock_fetch.assert_called_once_with(
-        mock_session, prediction_date="2024-03-20"
-    )
+    mock_fetch.assert_called_once_with(mock_session, prediction_date="2024-03-20")

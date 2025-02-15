@@ -12,11 +12,13 @@ def test_sproc_training_success(mocker):
 
     # 各依存関数のモック化
     mock_fetch = mocker.patch("src.pipelines.sproc_training.fetch_training_dataset")
-    mock_fetch.return_value = pd.DataFrame({
-        "UID": ["user1", "user2"],
-        "FEATURE1": [0.1, 0.2],
-        "REVENUE": [0, 1],
-    })
+    mock_fetch.return_value = pd.DataFrame(
+        {
+            "UID": ["user1", "user2"],
+            "FEATURE1": [0.1, 0.2],
+            "REVENUE": [0, 1],
+        }
+    )
 
     mock_split = mocker.patch("src.pipelines.sproc_training.split_data")
     mock_split.return_value = (

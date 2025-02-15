@@ -37,7 +37,7 @@ def sproc_prediction(session: Session, prediction_date: str = "2024-10-01") -> i
         Exception: 処理中にエラーが発生した場合
     """
     try:
-        setup_logging() 
+        setup_logging()
 
         logger.info(f"Starting prediction process, prediction_date={prediction_date}")
 

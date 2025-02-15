@@ -1,7 +1,11 @@
 import pandas as pd
 import pytest
 
-from src.data.loader import fetch_training_dataset, fetch_prediction_dataset, fetch_test_dataset
+from src.data.loader import (
+    fetch_prediction_dataset,
+    fetch_test_dataset,
+    fetch_training_dataset,
+)
 from src.utils.config import load_config
 
 config = load_config()
@@ -51,7 +55,9 @@ def test_fetch_training_dataset(mock_snowflake_session, mocker):
     sql_query = mock_snowflake_session.sql.call_args[0][0]
     period_months = config["data"]["period"]["months"]
     expected_end_date = mock_now.strftime("%Y-%m-%d")
-    expected_start_date = (mock_now - pd.DateOffset(months=period_months)).strftime("%Y-%m-%d")
+    expected_start_date = (mock_now - pd.DateOffset(months=period_months)).strftime(
+        "%Y-%m-%d"
+    )
     assert f"BETWEEN '{expected_start_date}' AND '{expected_end_date}'" in sql_query
 
 
@@ -59,7 +65,9 @@ def test_fetch_prediction_dataset(mock_snowflake_session):
     """推論用データセット取得のテスト"""
     # 実行
     prediction_date = "2024-12-01"
-    df = fetch_prediction_dataset(mock_snowflake_session, prediction_date=prediction_date)
+    df = fetch_prediction_dataset(
+        mock_snowflake_session, prediction_date=prediction_date
+    )
 
     # アサーション
     assert df is not None
@@ -184,7 +192,7 @@ def test_fetch_test_dataset(mock_snowflake_session, mocker):
     # SQLクエリにテスト用の日付条件が含まれていることを確認
     sql_query = mock_snowflake_session.sql.call_args[0][0]
     expected_start_date = "2025-01-31"  # モデル作成日の翌日
-    expected_end_date = "2025-02-13"    # モデル作成日から14日後
+    expected_end_date = "2025-02-13"  # モデル作成日から14日後
     assert f"BETWEEN '{expected_start_date}' AND '{expected_end_date}'" in sql_query
 
 
@@ -193,7 +201,7 @@ def test_fetch_test_dataset_error(mocker):
     # エラーを発生させるモックセッション
     error_session = mocker.Mock()
     error_session.sql.side_effect = Exception("Database connection failed")
-    
+
     # モデルバージョンのモック
     mock_model_version = mocker.Mock()
     mock_model_version.version_name = "V_250130_121116"

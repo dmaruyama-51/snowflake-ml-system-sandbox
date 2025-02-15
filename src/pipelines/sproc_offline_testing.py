@@ -1,7 +1,6 @@
 import logging
 import os
 import sys
-from datetime import datetime
 
 from snowflake.snowpark import Session
 
@@ -45,12 +44,9 @@ def sproc_offline_testing(session: Session) -> int:
         challenger_mv = load_latest_model_version(session)
 
         # テストデータの取得
-        
-
 
         # モデル比較
 
-        
         return 1
 
     except Exception as e:
@@ -85,7 +81,9 @@ if __name__ == "__main__":
             "execute_as": "caller",
         }
         session.sproc.register(func=sproc_offline_testing, **sproc_config)  # type: ignore
-        session.sql("ALTER PROCEDURE OFFLINE_TESTING() SET LOG_LEVEL = 'INFO'").collect()
+        session.sql(
+            "ALTER PROCEDURE OFFLINE_TESTING() SET LOG_LEVEL = 'INFO'"
+        ).collect()
 
     except Exception as e:
         print(f"An error occurred: {str(e)}")
