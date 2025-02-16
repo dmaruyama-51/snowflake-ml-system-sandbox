@@ -1,61 +1,51 @@
 import logging
-from typing import Optional
+from datetime import datetime
 
 import pandas as pd
+from snowflake.ml.model import ModelVersion
 from snowflake.snowpark import Session
 
 from src.utils.config import load_config
+from src.utils.constants import (
+    CATEGORICAL_FEATURES,
+    DATASET,
+    NUMERICAL_FEATURES,
+    SCHEMA,
+    TARGET,
+)
 
 logger = logging.getLogger(__name__)
 config = load_config()
 
 
-def fetch_dataset(
-    session: Session, is_training: bool = True, prediction_date: Optional[str] = None
-) -> Optional[pd.DataFrame]:
-    """データセットを取得する関数
+def _get_base_config():
+    """基本設定を取得する内部関数"""
+    select_columns = ["UID"] + CATEGORICAL_FEATURES + NUMERICAL_FEATURES + TARGET
+    return SCHEMA, DATASET, select_columns
+
+
+def fetch_training_dataset(session: Session) -> pd.DataFrame:
+    """学習用データセットを取得する関数
 
     Args:
         session (Session): Snowflakeセッション
-        is_training (bool): 学習時かどうかのフラグ。デフォルトはTrue
-        prediction_date (str): 推論日付（YYYY-MM-DD）
 
     Returns:
-        Optional[pd.DataFrame]: 取得したデータフレーム。エラー時はNone
+        pd.DataFrame: 取得したデータフレーム
     """
-
     try:
-        # config からデータセットの設定を取得
-        schema = config["data"]["snowflake"]["schema"]
-        table = config["data"]["snowflake"]["dataset_table"]
-        categorical_features = config["data"]["features"]["categorical"]
-        numerical_features = config["data"]["features"]["numeric"]
-        target = config["data"]["target"]
+        schema, table, select_columns = _get_base_config()
+        period_months = config["data"]["period"]["months"]
 
-        logger.info(f"Starting dataset retrieval from {schema}.{table}")
-        select_columns = ["UID"] + categorical_features + numerical_features + target
+        end_date = pd.Timestamp.now().strftime("%Y-%m-%d")
+        start_date = (
+            pd.Timestamp.now() - pd.DateOffset(months=period_months)
+        ).strftime("%Y-%m-%d")
+        date_condition = f"SESSION_DATE BETWEEN '{start_date}' AND '{end_date}'"
 
-        # 学習時と推論時で日付条件を分岐
-        if is_training:
-            period_months = config["data"]["period"][
-                "months"
-            ]  # 期間（月数）を設定から取得
-            # 現在の日付から指定された月数前までの期間を設定
-            end_date = pd.Timestamp.now().strftime("%Y-%m-%d")
-            start_date = (
-                pd.Timestamp.now() - pd.DateOffset(months=period_months)
-            ).strftime("%Y-%m-%d")
-            date_condition = f"SESSION_DATE BETWEEN '{start_date}' AND '{end_date}'"
-            logger.info(
-                f"Retrieving training data: period from {start_date} to {end_date} ({period_months} months)"
-            )
-        else:
-            if prediction_date is None:
-                raise ValueError("prediction_date is required for inference")
-
-            # 推論時は引数の推論日付を条件にする
-            date_condition = f"SESSION_DATE = '{prediction_date}'"
-            logger.info(f"Retrieving inference data for date: '{prediction_date}'")
+        logger.info(
+            f"Retrieving training data: period from {start_date} to {end_date} ({period_months} months)"
+        )
 
         query_string = f"""
             SELECT {', '.join(select_columns)} 
@@ -67,11 +57,92 @@ def fetch_dataset(
         if len(df) == 0:
             raise ValueError("No data found for the specified period.")
 
-        # 取得成功時のログ
-        logger.info(f"Dataset retrieval completed: {len(df)} rows")
+        logger.info(f"Training dataset retrieval completed: {len(df)} rows")
         return df
 
     except Exception as e:
-        # エラー発生時のログ
-        logger.error(f"Error occurred during dataset retrieval: {str(e)}")
-        raise RuntimeError(f"Error occurred during dataset retrieval: {str(e)}")
+        logger.error(f"Error occurred during training dataset retrieval: {str(e)}")
+        raise RuntimeError(
+            f"Error occurred during training dataset retrieval: {str(e)}"
+        )
+
+
+def fetch_prediction_dataset(session: Session, prediction_date: str) -> pd.DataFrame:
+    """推論用データセットを取得する関数
+
+    Args:
+        session (Session): Snowflakeセッション
+        prediction_date (str): 推論日付（YYYY-MM-DD）
+
+    Returns:
+        pd.DataFrame: 取得したデータフレーム
+    """
+    try:
+        if not prediction_date:
+            raise ValueError("prediction_date is required for inference")
+
+        schema, table, select_columns = _get_base_config()
+        date_condition = f"SESSION_DATE = '{prediction_date}'"
+
+        logger.info(f"Retrieving inference data for date: {prediction_date}")
+
+        query_string = f"""
+            SELECT {', '.join(select_columns)} 
+            FROM {schema}.{table}
+            WHERE {date_condition}
+        """
+        df = session.sql(query_string).to_pandas()
+
+        if len(df) == 0:
+            raise ValueError("No data found for the specified date.")
+
+        logger.info(f"Prediction dataset retrieval completed: {len(df)} rows")
+        return df
+
+    except Exception as e:
+        logger.error(f"Error occurred during prediction dataset retrieval: {str(e)}")
+        raise RuntimeError(
+            f"Error occurred during prediction dataset retrieval: {str(e)}"
+        )
+
+
+def fetch_test_dataset(session: Session, model_version: ModelVersion) -> pd.DataFrame:
+    """テスト用データセットを取得する関数
+
+    Args:
+        session (Session): Snowflakeセッション
+        model_version (ModelVersion): 評価対象のモデルバージョン
+
+    Returns:
+        pd.DataFrame: 取得したデータフレーム
+    """
+    try:
+        schema, table, select_columns = _get_base_config()
+
+        # モデルバージョンの作成日を取得
+        model_version_name = model_version.version_name
+        model_created_date = datetime.strptime(f"20{model_version_name[2:8]}", "%Y%m%d")
+
+        # 評価期間の設定（モデル作成日から2週間）
+        start_date = (model_created_date + pd.DateOffset(days=1)).strftime("%Y-%m-%d")
+        end_date = (model_created_date + pd.DateOffset(days=14)).strftime("%Y-%m-%d")
+        date_condition = f"SESSION_DATE BETWEEN '{start_date}' AND '{end_date}'"
+
+        logger.info(f"Retrieving testing data: period from {start_date} to {end_date}")
+
+        query_string = f"""
+            SELECT {', '.join(select_columns)} 
+            FROM {schema}.{table}
+            WHERE {date_condition}
+        """
+        df = session.sql(query_string).to_pandas()
+
+        if len(df) == 0:
+            raise ValueError("No data found for the specified period.")
+
+        logger.info(f"Testing dataset retrieval completed: {len(df)} rows")
+        return df
+
+    except Exception as e:
+        logger.error(f"Error occurred during testing dataset retrieval: {str(e)}")
+        raise RuntimeError(f"Error occurred during testing dataset retrieval: {str(e)}")

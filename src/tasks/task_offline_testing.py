@@ -9,9 +9,9 @@ from src.utils.snowflake import create_session
 logger = logging.getLogger(__name__)
 
 
-def create_training_task(session: Session) -> None:
+def create_offline_testing_task(session: Session) -> None:
     """
-    トレーニング用のストアドプロシージャを実行するタスクを作成する
+    オフラインテスト用のストアドプロシージャを実行するタスクを作成する
 
     Args:
         session (Session): Snowflakeセッション
@@ -21,25 +21,25 @@ def create_training_task(session: Session) -> None:
     """
     try:
         setup_logging()
-        logger.info("Starting training task creation")
+        logger.info("Starting offline testing task creation")
 
         # タスクの作成
         create_task_sql = """
-        CREATE OR REPLACE TASK task_training
+        CREATE OR REPLACE TASK task_offline_testing
             WAREHOUSE = COMPUTE_WH
-            SCHEDULE = 'USING CRON 0 10 1 * * Asia/Tokyo'  -- 毎月1日の午前10時に実行
+            SCHEDULE = 'USING CRON 0 10 15 * * Asia/Tokyo'  -- 毎月15日の午前10時に実行
         AS
-            CALL training();
+            CALL offline_testing();
         """
         session.sql(create_task_sql).collect()
         logger.info("Task created successfully")
 
         # タスクの有効化
-        session.sql("ALTER TASK task_training RESUME").collect()
+        session.sql("ALTER TASK task_offline_testing RESUME").collect()
         logger.info("Task resumed successfully")
 
     except Exception as e:
-        error_msg = f"Failed to create training task: {str(e)}"
+        error_msg = f"Failed to create offline testing task: {str(e)}"
         logger.error(error_msg)
         raise
 
@@ -50,7 +50,7 @@ if __name__ == "__main__":
         if session is None:
             raise RuntimeError("Failed to create Snowflake session")
 
-        create_training_task(session)
+        create_offline_testing_task(session)
 
     except Exception as e:
         print(f"An error occurred: {str(e)}")
