@@ -4,7 +4,12 @@ import pytest
 from snowflake.ml.model import ModelVersion
 from snowflake.ml.registry import Registry
 
-from src.models.predictor import load_latest_model_version, load_default_model_version, predict_proba, predict_label
+from src.models.predictor import (
+    load_default_model_version,
+    load_latest_model_version,
+    predict_label,
+    predict_proba,
+)
 
 
 @pytest.fixture
@@ -35,7 +40,7 @@ def test_load_latest_model_version(mocker, mock_registry):
     # アサーション
     assert isinstance(model_version, mocker.Mock)
     mock_registry.get_model.assert_called_once_with("random_forest")
-    
+
     # last メソッドが呼ばれたことを確認
     model_ref = mock_registry.get_model.return_value
     model_ref.last.assert_called_once()
@@ -53,7 +58,7 @@ def test_load_default_model_version(mocker, mock_registry):
     # アサーション
     assert isinstance(model_version, mocker.Mock)
     mock_registry.get_model.assert_called_once_with("random_forest")
-    
+
     # default プロパティにアクセスしたことを確認
     model_ref = mock_registry.get_model.return_value
     assert model_ref.default == model_version
@@ -78,7 +83,9 @@ def test_predict_proba(mocker):
     assert isinstance(predictions, np.ndarray)
     assert len(predictions) == 3
     np.testing.assert_array_almost_equal(predictions, np.array([0.8, 0.7, 0.6]))
-    mock_model_version.run.assert_called_once_with(features, function_name="predict_proba")
+    mock_model_version.run.assert_called_once_with(
+        features, function_name="predict_proba"
+    )
 
 
 def test_predict_label(mocker):
@@ -88,9 +95,7 @@ def test_predict_label(mocker):
 
     # ModelVersion モックの作成
     mock_model_version = mocker.Mock(spec=ModelVersion)
-    mock_predictions = pd.DataFrame(
-        {"output_feature_0": [1, 0, 1]}
-    )
+    mock_predictions = pd.DataFrame({"output_feature_0": [1, 0, 1]})
     mock_model_version.run.return_value = mock_predictions
 
     # テスト実行

@@ -24,7 +24,7 @@ def create_offline_testing_task(session: Session) -> None:
         logger.info("Starting offline testing task creation")
 
         # タスクの作成
-        create_task_sql = f"""
+        create_task_sql = """
         CREATE OR REPLACE TASK task_offline_testing
             WAREHOUSE = COMPUTE_WH
             SCHEDULE = 'USING CRON 0 10 15 * * Asia/Tokyo'  -- 毎月15日の午前10時に実行
@@ -57,4 +57,4 @@ if __name__ == "__main__":
         sys.exit(1)
     finally:
         if session:
-            session.close() 
+            session.close()

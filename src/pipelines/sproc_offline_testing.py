@@ -2,13 +2,17 @@ import logging
 import os
 import sys
 
+from snowflake.ml.registry import Registry
 from snowflake.snowpark import Session
 
-from snowflake.ml.registry import Registry
-
 from src.data.loader import fetch_test_dataset
+from src.models.predictor import (
+    load_default_model_version,
+    load_latest_model_version,
+    predict_label,
+    predict_proba,
+)
 from src.models.trainer import calc_evaluation_metrics
-from src.models.predictor import load_default_model_version, load_latest_model_version, predict_proba, predict_label
 from src.utils.config import load_config
 from src.utils.logger import setup_logging
 from src.utils.snowflake import create_session
@@ -66,16 +70,22 @@ def sproc_offline_testing(session: Session) -> int:
         champion_pred_proba = predict_proba(test_features, champion_mv)
         challenger_pred_label = predict_label(test_features, challenger_mv)
         champion_pred_label = predict_label(test_features, champion_mv)
-        
+
         logger.info("Calculating evaluation metrics")
-        challenger_scores = calc_evaluation_metrics(test_target, challenger_pred_label, challenger_pred_proba)
-        champion_scores = calc_evaluation_metrics(test_target, champion_pred_label, champion_pred_proba)
-        
+        challenger_scores = calc_evaluation_metrics(
+            test_target, challenger_pred_label, challenger_pred_proba
+        )
+        champion_scores = calc_evaluation_metrics(
+            test_target, champion_pred_label, champion_pred_proba
+        )
+
         logger.info(f"Champion model scores: {champion_scores}")
         logger.info(f"Challenger model scores: {challenger_scores}")
 
         if challenger_scores["PR-AUC"] > champion_scores["PR-AUC"]:
-            logger.info(f"Challenger model (PR-AUC: {challenger_scores['PR-AUC']:.4f}) is better than Champion model (PR-AUC: {champion_scores['PR-AUC']:.4f})")
+            logger.info(
+                f"Challenger model (PR-AUC: {challenger_scores['PR-AUC']:.4f}) is better than Champion model (PR-AUC: {champion_scores['PR-AUC']:.4f})"
+            )
             logger.info("Updating default version to challenger model")
 
             registry = Registry(session=session)
@@ -84,14 +94,18 @@ def sproc_offline_testing(session: Session) -> int:
             logger.info("Default version updated successfully")
 
         else:
-            logger.info(f"Champion model (PR-AUC: {champion_scores['PR-AUC']:.4f}) is better than Challenger model (PR-AUC: {challenger_scores['PR-AUC']:.4f})")
+            logger.info(
+                f"Champion model (PR-AUC: {champion_scores['PR-AUC']:.4f}) is better than Challenger model (PR-AUC: {challenger_scores['PR-AUC']:.4f})"
+            )
             logger.info("No action taken")
 
         logger.info("Offline testing completed successfully")
         return 1
 
     except Exception as e:
-        logger.error(f"An error occurred during offline testing: {str(e)}", exc_info=True)
+        logger.error(
+            f"An error occurred during offline testing: {str(e)}", exc_info=True
+        )
         raise e
 
 

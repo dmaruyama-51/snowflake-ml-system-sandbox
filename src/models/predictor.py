@@ -34,6 +34,7 @@ def predict_proba(features: pd.DataFrame, mv: ModelVersion) -> np.ndarray:
     pred_probas_df = mv.run(features, function_name="predict_proba")
     return pred_probas_df.output_feature_1.values
 
+
 def predict_label(features: pd.DataFrame, mv: ModelVersion) -> np.ndarray:
     """
     モデルを用いて推論を行う
