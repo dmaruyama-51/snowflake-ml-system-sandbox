@@ -5,7 +5,7 @@ import sys
 from snowflake.snowpark import Session
 
 from src.data.loader import fetch_prediction_dataset
-from src.models.predictor import load_latest_model_version, predict_proba
+from src.models.predictor import load_default_model_version, predict_proba
 from src.utils.config import load_config
 from src.utils.constants import DATABASE_DEV, IMPORTS_DIR, SCHEMA
 from src.utils.logger import setup_logging
@@ -41,7 +41,7 @@ def sproc_prediction(session: Session, prediction_date: str = "2024-10-01") -> i
         features = df.drop(columns=["UID"])
         logger.info(f"Dataset fetched successfully. Number of rows: {len(df)}")
 
-        mv = load_latest_model_version(session)
+        mv = load_default_model_version(session)
         logger.info("Model loading completed")
 
         df["SCORE"] = predict_proba(features, mv)
