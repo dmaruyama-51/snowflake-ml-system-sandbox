@@ -6,6 +6,7 @@ from snowflake.ml.model import ModelVersion
 from snowflake.snowpark import Session
 
 from src.utils.config import load_config
+from src.utils.constants import SCHEMA, DATASET, CATEGORICAL_FEATURES, NUMERICAL_FEATURES, TARGET
 
 logger = logging.getLogger(__name__)
 config = load_config()
@@ -13,13 +14,8 @@ config = load_config()
 
 def _get_base_config():
     """基本設定を取得する内部関数"""
-    schema = config["data"]["snowflake"]["schema"]
-    table = config["data"]["snowflake"]["dataset_table"]
-    categorical_features = config["data"]["features"]["categorical"]
-    numerical_features = config["data"]["features"]["numeric"]
-    target = config["data"]["target"]
-    select_columns = ["UID"] + categorical_features + numerical_features + target
-    return schema, table, select_columns
+    select_columns = ["UID"] + CATEGORICAL_FEATURES + NUMERICAL_FEATURES + TARGET
+    return SCHEMA, DATASET, select_columns
 
 
 def fetch_training_dataset(session: Session) -> pd.DataFrame:

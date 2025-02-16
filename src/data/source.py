@@ -8,6 +8,7 @@ from ucimlrepo import fetch_ucirepo
 
 from src.utils.config import load_config
 from src.utils.snowflake import upload_dataframe_to_snowflake
+from src.utils.constants import DATABASE_DEV, SCHEMA, SOURCE
 
 logger = logging.getLogger(__name__)
 
@@ -83,10 +84,10 @@ def prepare_online_shoppers_data(
         database_name = (
             database_name
             or session.get_current_database()
-            or config["data"]["snowflake"]["database_dev"]
+            or DATABASE_DEV
         )
-        schema_name = schema_name or config["data"]["snowflake"]["schema"]
-        table_name = table_name or config["data"]["snowflake"]["source_table"]
+        schema_name = schema_name or SCHEMA
+        table_name = table_name or SOURCE
 
         logger.info("Starting dataset retrieval")
         dataset = fetch_ucirepo(id=468)
