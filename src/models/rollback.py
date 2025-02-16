@@ -24,19 +24,19 @@ def rollback_model(session: Session, version_name: str) -> None:
     try:
         registry = Registry(session=session)
         model_ref = registry.get_model("random_forest")
-        
+
         # 指定されたバージョンが存在するか確認
         try:
             target_version = model_ref.version(version_name)
         except Exception as e:
             raise ValueError(f"Specified version {version_name} not found: {str(e)}")
-        
+
         # 現在のデフォルトバージョンを取得
         current_default = model_ref.default
-        
+
         logger.info(f"Current default version: {current_default.version_name}")
         logger.info(f"Target rollback version: {version_name}")
-        
+
         # デフォルトバージョンを更新
         model_ref.default = target_version
         logger.info(f"Default version updated to {version_name}")
@@ -49,7 +49,7 @@ def rollback_model(session: Session, version_name: str) -> None:
 
 def main() -> None:
     setup_logging()
-    
+
     parser = argparse.ArgumentParser(description="Model rollback process")
     parser.add_argument(
         "version_name",
