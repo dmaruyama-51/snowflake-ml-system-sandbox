@@ -34,6 +34,18 @@ all: test lint format
 run-streamlit: __require_streamlit_app_name__
 	${POETRY_RUN} streamlit run src/streamlit/${APP_NAME}/app.py
 
+
+# ==============================
+# rollback
+# ==============================
+
+rollback:
+	@if [ -z "$(version)" ]; then \
+		echo "エラー: バージョンを指定してください。使用例: make rollback version=v_250130_121116"; \
+		exit 1; \
+	fi
+	python src/models/rollback.py $(version)
+
 # ==============================
 # deploy
 # ==============================
