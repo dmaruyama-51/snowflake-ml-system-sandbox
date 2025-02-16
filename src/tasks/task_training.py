@@ -29,7 +29,7 @@ def create_training_task(session: Session) -> None:
             WAREHOUSE = COMPUTE_WH
             SCHEDULE = 'USING CRON 0 10 1 * * Asia/Tokyo'  -- 毎月1日の午前10時に実行
         AS
-            CALL practice.ml.training();
+            CALL training();
         """
         session.sql(create_task_sql).collect()
         logger.info("Task created successfully")

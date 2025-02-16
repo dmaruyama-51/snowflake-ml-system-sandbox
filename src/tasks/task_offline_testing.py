@@ -29,7 +29,7 @@ def create_offline_testing_task(session: Session) -> None:
             WAREHOUSE = COMPUTE_WH
             SCHEDULE = 'USING CRON 0 10 15 * * Asia/Tokyo'  -- 毎月15日の午前10時に実行
         AS
-            CALL {session.get_current_database()}.{session.get_current_schema()}.offline_testing();
+            CALL offline_testing();
         """
         session.sql(create_task_sql).collect()
         logger.info("Task created successfully")
