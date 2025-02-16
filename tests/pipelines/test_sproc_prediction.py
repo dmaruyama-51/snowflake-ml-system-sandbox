@@ -22,7 +22,7 @@ def test_sproc_prediction_success(mocker):
     mock_model_version._version_name = "v1"
 
     mock_load_model = mocker.patch(
-        "src.pipelines.sproc_prediction.load_latest_model_version"
+        "src.pipelines.sproc_prediction.load_default_model_version"
     )
     mock_load_model.return_value = mock_model_version
 
