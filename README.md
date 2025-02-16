@@ -4,7 +4,6 @@
 
 This repository serves as a personal sandbox for exploring and staying up-to-date with Snowflake's latest machine learning features. The primary focus is on implementing practical use cases to deepen understanding and evaluate the integration of Snowflake’s capabilities with Python-based workflows. Specifically, this sandbox demonstrates predicting and scoring customer purchasing intent in an online shopping context, storing these scores in Snowflake for downstream marketing applications.
 
-![system_overview](./images/overview.png)
 
 ## Usecase
 
@@ -14,12 +13,54 @@ The system predicts customer purchasing intent based on session data from an onl
 
 This setup simulates a marketing pipeline, enabling targeted campaigns based on intent scores.
 
-### Dataset
+## ML Sysmtem Details 
+
+![system_overview](./images/overview.png)
+
+### Data Flow
+
+#### Data Source
 The dataset used is a modified version of the [Online Shoppers Purchasing Intention Dataset](https://archive.ics.uci.edu/dataset/468/online+shoppers+purchasing+intention+dataset) from the UCI Machine Learning Repository. Modifications include:
 - `SessionDate`: Derived from the Month column and formatted as 2024-xx-01.
 - `UID`: Generated using UUIDs.
 
 By combining SessionDate and UID, each record in the dataset is uniquely identifiable. 
+
+#### Data pipeline
+
+1. Source Table (source)
+    - Stores raw data
+2. Dataset Table (dataset)
+    - Stores processed data for machine learning
+    - Contains feature-engineered data
+3. Scores Table (scores)
+    - Stores prediction results
+    - Contains UID, session date, model name, model version, and scores
+
+### Model Training Process 
+
+#### Challenger Model Generation (sproc_training)
+- Execution: 1st day of every month at 10:00 AM (JST)
+- Process Details:
+    - Model Training: Uses the last 3 months of data as train/val dataset
+    - Feature and hyperparameter search space configurations are managed in `src/config.yml`
+
+#### Model Evaluation & Update (sproc_model_evaluation)
+- Execution: 15th day of every month at 10:00 AM (JST)
+- Process Details:
+    - Model Evaluation: Uses the last 2 weeks of data (2 weeks after challenger model generation) as test dataset
+    - Model Update: Updates the production model if the challenger model outperforms the champion model
+
+#### Model Rollback
+- Command: `make rollback version=<version_name>`
+- Process Details:
+    - Rolls back the model to the specified version
+    - Version name format: `v_YYMMDD_HHMMSS` (e.g., `v_250130_121116`)
+
+
+### Model Inference Process 
+- Execution: Daily at 8:00 AM (JST)
+- Process Details: Predicts purchase intent scores for the previous day's data
 
 ## Technical Stack
 

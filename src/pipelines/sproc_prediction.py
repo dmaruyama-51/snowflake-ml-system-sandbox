@@ -4,22 +4,16 @@ import sys
 
 from snowflake.snowpark import Session
 
-from src.data.loader import fetch_dataset
-from src.models.predictor import load_latest_model_version, predict
+from src.data.loader import fetch_prediction_dataset
+from src.models.predictor import load_default_model_version, predict_proba
 from src.utils.config import load_config
+from src.utils.constants import DATABASE_DEV, IMPORTS_DIR, SCHEMA
 from src.utils.logger import setup_logging
 from src.utils.snowflake import create_session, upload_dataframe_to_snowflake
 
 logger = logging.getLogger(__name__)
 
 config = load_config()
-DATABASE_DEV = config["data"]["snowflake"]["database_dev"]
-SCHEMA = config["data"]["snowflake"]["schema"]
-DATASET = config["data"]["snowflake"]["dataset_table"]
-SOURCE = config["data"]["snowflake"]["source_table"]
-
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-IMPORTS_DIR = os.path.join(BASE_DIR, "src")
 
 
 def sproc_prediction(session: Session, prediction_date: str = "2024-10-01") -> int:
@@ -37,20 +31,20 @@ def sproc_prediction(session: Session, prediction_date: str = "2024-10-01") -> i
         Exception: 処理中にエラーが発生した場合
     """
     try:
-        setup_logging()  # ロギング設定の初期化
+        setup_logging()
 
         logger.info(f"Starting prediction process, prediction_date={prediction_date}")
 
-        df = fetch_dataset(session, is_training=False, prediction_date=prediction_date)
+        df = fetch_prediction_dataset(session, prediction_date=prediction_date)
         if df is None:
             raise ValueError("Failed to fetch dataset")
         features = df.drop(columns=["UID"])
         logger.info(f"Dataset fetched successfully. Number of rows: {len(df)}")
 
-        mv = load_latest_model_version(session)
+        mv = load_default_model_version(session)
         logger.info("Model loading completed")
 
-        df["SCORE"] = predict(features, mv)
+        df["SCORE"] = predict_proba(features, mv)
         logger.info("Prediction completed")
 
         # 推論結果をスコアテーブルに書き込み

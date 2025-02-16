@@ -5,7 +5,7 @@ from snowflake.snowpark import Session
 
 from src.data.dataset import create_ml_dataset
 from src.data.source import prepare_online_shoppers_data
-from src.utils.config import load_config
+from src.utils.constants import DATABASE_DEV, DATASET, SCHEMA, SOURCE
 from src.utils.logger import setup_logging
 from src.utils.snowflake import create_session
 
@@ -16,31 +16,22 @@ def setup_environment(session: Session) -> None:
     try:
         setup_logging()
 
-        config = load_config()
-        database_name = (
-            session.get_current_database()
-            or config["data"]["snowflake"]["database_dev"]
-        )
-        schema_name = config["data"]["snowflake"]["schema"]
-        source_table_name = config["data"]["snowflake"]["source_table"]
-        dataset_table_name = config["data"]["snowflake"]["dataset_table"]
+        database_name = session.get_current_database() or DATABASE_DEV
 
         # データベースが存在しない場合は作成
         session.sql(f"CREATE DATABASE IF NOT EXISTS {database_name}").collect()
         logger.info(f"Ensured database {database_name} exists")
 
         # スキーマが存在しない場合は作成
-        session.sql(
-            f"CREATE SCHEMA IF NOT EXISTS {database_name}.{schema_name}"
-        ).collect()
-        logger.info(f"Ensured schema {schema_name} exists in database {database_name}")
+        session.sql(f"CREATE SCHEMA IF NOT EXISTS {database_name}.{SCHEMA}").collect()
+        logger.info(f"Ensured schema {SCHEMA} exists in database {database_name}")
 
         # ソーステーブルを作成
         prepare_online_shoppers_data(
             session=session,
             database_name=database_name,
-            schema_name=schema_name,
-            table_name=source_table_name,
+            schema_name=SCHEMA,
+            table_name=SOURCE,
         )
 
         # データセットテーブルを作成
@@ -49,9 +40,9 @@ def setup_environment(session: Session) -> None:
             session=session,
             target_date=today,
             database_name=database_name,
-            schema_name=schema_name,
-            table_name=dataset_table_name,
-            source_table_name=source_table_name,
+            schema_name=SCHEMA,
+            table_name=DATASET,
+            source_table_name=SOURCE,
         )
 
         # Scores テーブルを作成

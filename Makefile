@@ -34,6 +34,18 @@ all: test lint format
 run-streamlit: __require_streamlit_app_name__
 	${POETRY_RUN} streamlit run src/streamlit/${APP_NAME}/app.py
 
+
+# ==============================
+# rollback
+# ==============================
+
+rollback:
+	@if [ -z "$(version)" ]; then \
+		echo "エラー: バージョンを指定してください。使用例: make rollback version=v_250130_121116"; \
+		exit 1; \
+	fi
+	python src/models/rollback.py $(version)
+
 # ==============================
 # deploy
 # ==============================
@@ -47,7 +59,10 @@ deploy-sproc-prediction:
 deploy-sproc-training:
 	${POETRY_RUN} python src/pipelines/sproc_training.py
 
-deploy-sproc: deploy-sproc-dataset deploy-sproc-prediction deploy-sproc-training
+deploy-sproc-offline-testing:
+	${POETRY_RUN} python src/pipelines/sproc_offline_testing.py
+
+deploy-sproc: deploy-sproc-dataset deploy-sproc-prediction deploy-sproc-training deploy-sproc-offline-testing
 
 deploy-task-dataset:
 	${POETRY_RUN} python src/tasks/task_dataset.py
@@ -58,7 +73,10 @@ deploy-task-prediction:
 deploy-task-training:
 	${POETRY_RUN} python src/tasks/task_training.py
 
-deploy-task: deploy-task-dataset deploy-task-prediction deploy-task-training
+deploy-task-offline-testing:
+	${POETRY_RUN} python src/tasks/task_offline_testing.py
+
+deploy-task: deploy-task-dataset deploy-task-prediction deploy-task-training deploy-task-offline-testing	
 
 deploy-streamlit: __require_streamlit_app_name__
 	cd src/streamlit/${APP_NAME} && \

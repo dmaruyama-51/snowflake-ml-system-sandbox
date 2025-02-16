@@ -6,19 +6,13 @@ from snowflake.snowpark import Session
 
 from src.data.dataset import update_ml_dataset
 from src.utils.config import load_config
+from src.utils.constants import DATABASE_DEV, DATASET, IMPORTS_DIR, SCHEMA, SOURCE
 from src.utils.logger import setup_logging
 from src.utils.snowflake import create_session
 
 logger = logging.getLogger(__name__)
 
 config = load_config()
-DATABASE_DEV = config["data"]["snowflake"]["database_dev"]
-SCHEMA = config["data"]["snowflake"]["schema"]
-DATASET = config["data"]["snowflake"]["dataset_table"]
-SOURCE = config["data"]["snowflake"]["source_table"]
-
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-IMPORTS_DIR = os.path.join(BASE_DIR, "src")
 
 
 def sproc_dataset(session: Session, target_date: str) -> int:

@@ -6,23 +6,17 @@ from datetime import datetime
 from snowflake.ml.registry import Registry
 from snowflake.snowpark import Session
 
-from src.data.loader import fetch_dataset
+from src.data.loader import fetch_training_dataset
 from src.data.preprocessing import split_data
 from src.models.trainer import calc_evaluation_metrics, train_model
 from src.utils.config import load_config
+from src.utils.constants import IMPORTS_DIR, SCHEMA
 from src.utils.logger import setup_logging
 from src.utils.snowflake import create_session
 
 logger = logging.getLogger(__name__)
 
 config = load_config()
-DATABASE_DEV = config["data"]["snowflake"]["database_dev"]
-SCHEMA = config["data"]["snowflake"]["schema"]
-DATASET = config["data"]["snowflake"]["dataset_table"]
-SOURCE = config["data"]["snowflake"]["source_table"]
-
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-IMPORTS_DIR = os.path.join(BASE_DIR, "src")
 
 
 def sproc_training(session: Session) -> int:
@@ -43,7 +37,7 @@ def sproc_training(session: Session) -> int:
 
         target_column = config["data"]["target"]
 
-        df = fetch_dataset(session, is_training=True)
+        df = fetch_training_dataset(session)
         if df is None:
             raise ValueError("Failed to fetch dataset")
         logger.info(f"Dataset fetched successfully. Number of rows: {len(df)}")
@@ -86,6 +80,8 @@ def sproc_training(session: Session) -> int:
                 1
             ),  # サンプル入力データを追加
         )
+
+        # ToDo: 本当は新モデルには challenger タグをつけて管理したい（2025/02/14現在, タグは Enterprise以上でしか利用できない）
         logger.info("Model logging completed")
 
         return 1
