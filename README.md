@@ -4,7 +4,6 @@
 
 This repository serves as a personal sandbox for exploring and staying up-to-date with Snowflake's latest machine learning features. The primary focus is on implementing practical use cases to deepen understanding and evaluate the integration of Snowflake’s capabilities with Python-based workflows. Specifically, this sandbox demonstrates predicting and scoring customer purchasing intent in an online shopping context, storing these scores in Snowflake for downstream marketing applications.
 
-![system_overview](./images/overview.png)
 
 ## Usecase
 
@@ -15,6 +14,8 @@ The system predicts customer purchasing intent based on session data from an onl
 This setup simulates a marketing pipeline, enabling targeted campaigns based on intent scores.
 
 ## ML Sysmtem Details 
+
+![system_overview](./images/overview.png)
 
 ### Data Flow
 
@@ -49,6 +50,13 @@ By combining SessionDate and UID, each record in the dataset is uniquely identif
 - Process Details:
     - Model Evaluation: Uses the last 2 weeks of data (2 weeks after challenger model generation) as test dataset
     - Model Update: Updates the production model if the challenger model outperforms the champion model
+
+#### Model Rollback
+- Command: `make rollback version=<version_name>`
+- Process Details:
+    - Rolls back the model to the specified version
+    - Version name format: `v_YYMMDD_HHMMSS` (e.g., `v_250130_121116`)
+
 
 ### Model Inference Process 
 - Execution: Daily at 8:00 AM (JST)
