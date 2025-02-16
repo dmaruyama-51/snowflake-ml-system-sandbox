@@ -5,9 +5,9 @@ from snowflake.snowpark import Session
 
 from src.data.dataset import create_ml_dataset
 from src.data.source import prepare_online_shoppers_data
+from src.utils.constants import DATABASE_DEV, DATASET, SCHEMA, SOURCE
 from src.utils.logger import setup_logging
 from src.utils.snowflake import create_session
-from src.utils.constants import DATABASE_DEV, SCHEMA, SOURCE, DATASET
 
 logger = logging.getLogger(__name__)
 
@@ -16,19 +16,14 @@ def setup_environment(session: Session) -> None:
     try:
         setup_logging()
 
-        database_name = (
-            session.get_current_database()
-            or DATABASE_DEV
-        )
+        database_name = session.get_current_database() or DATABASE_DEV
 
         # データベースが存在しない場合は作成
         session.sql(f"CREATE DATABASE IF NOT EXISTS {database_name}").collect()
         logger.info(f"Ensured database {database_name} exists")
 
         # スキーマが存在しない場合は作成
-        session.sql(
-            f"CREATE SCHEMA IF NOT EXISTS {database_name}.{SCHEMA}"
-        ).collect()
+        session.sql(f"CREATE SCHEMA IF NOT EXISTS {database_name}.{SCHEMA}").collect()
         logger.info(f"Ensured schema {SCHEMA} exists in database {database_name}")
 
         # ソーステーブルを作成

@@ -7,9 +7,9 @@ from snowflake.snowpark import Session
 from src.data.loader import fetch_prediction_dataset
 from src.models.predictor import load_latest_model_version, predict_proba
 from src.utils.config import load_config
+from src.utils.constants import DATABASE_DEV, IMPORTS_DIR, SCHEMA
 from src.utils.logger import setup_logging
 from src.utils.snowflake import create_session, upload_dataframe_to_snowflake
-from src.utils.constants import DATABASE_DEV, SCHEMA, IMPORTS_DIR
 
 logger = logging.getLogger(__name__)
 

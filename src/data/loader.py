@@ -6,7 +6,13 @@ from snowflake.ml.model import ModelVersion
 from snowflake.snowpark import Session
 
 from src.utils.config import load_config
-from src.utils.constants import SCHEMA, DATASET, CATEGORICAL_FEATURES, NUMERICAL_FEATURES, TARGET
+from src.utils.constants import (
+    CATEGORICAL_FEATURES,
+    DATASET,
+    NUMERICAL_FEATURES,
+    SCHEMA,
+    TARGET,
+)
 
 logger = logging.getLogger(__name__)
 config = load_config()

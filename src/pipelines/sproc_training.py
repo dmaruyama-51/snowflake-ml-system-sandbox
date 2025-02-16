@@ -10,9 +10,9 @@ from src.data.loader import fetch_training_dataset
 from src.data.preprocessing import split_data
 from src.models.trainer import calc_evaluation_metrics, train_model
 from src.utils.config import load_config
+from src.utils.constants import IMPORTS_DIR, SCHEMA
 from src.utils.logger import setup_logging
 from src.utils.snowflake import create_session
-from src.utils.constants import SCHEMA, IMPORTS_DIR
 
 logger = logging.getLogger(__name__)
 

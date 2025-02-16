@@ -14,9 +14,9 @@ from src.models.predictor import (
 )
 from src.models.trainer import calc_evaluation_metrics
 from src.utils.config import load_config
+from src.utils.constants import IMPORTS_DIR, SCHEMA
 from src.utils.logger import setup_logging
 from src.utils.snowflake import create_session
-from src.utils.constants import SCHEMA, IMPORTS_DIR
 
 logger = logging.getLogger(__name__)
 config = load_config()
